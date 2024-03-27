@@ -13,7 +13,7 @@ You can find here details about the GreenScan, from a high-level vision to low-l
   * [Mockup](docs/Requirements.md###Mockup)
 * [Architecture and Design](docs/ArchitectureAndDesign.md###Logical-architecture)
   * [Logical architecture](docs/ArchitectureAndDesign.md)
-  * [Physical architecture](docs/ArchitectureAndDesign.md###Physical-architecture)
+  * [Physical architecture](docs/ArchitectureAndDesign.md#Physical-architecture)
   * [Vertical prototype](docs/ArchitectureAndDesign.md###Vertical-prototype)
 * [Project management]
 
