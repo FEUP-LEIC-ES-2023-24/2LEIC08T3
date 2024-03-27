@@ -12,4 +12,4 @@
 
 ### Vertical prototype
 
-!FALTA PROTÓTIPO!
+![Vertical prototype](images/vertical_prototype.gif)
