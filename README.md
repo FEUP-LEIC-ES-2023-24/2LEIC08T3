@@ -10,11 +10,11 @@ You can find here details about the GreenScan, from a high-level vision to low-l
   * [Elevator Pitch](docs/BusinessModelling.md#Elevator-Pitch)
 * [Requirements](docs/Requirements.md)
   * [Domain model](docs/Requirements.md#Domain-Model)
-  * [Mockup](docs/Requirements.md#Mockup)
-* [Architecture and Design]
-  * [Logical architecture]
-  * [Physical architecture]
-  * [Vertical prototype]
+  * [Mockup](docs/Requirements.md###Mockup)
+* [Architecture and Design](docs/ArchitectureAndDesign.md###Logical-architecture)
+  * [Logical architecture](docs/ArchitectureAndDesign.md)
+  * [Physical architecture](docs/ArchitectureAndDesign.md###Physical-architecture)
+  * [Vertical prototype](docs/ArchitectureAndDesign.md###Vertical-prototype)
 * [Project management]
 
 Contributions are expected to be made exclusively by the initial team, but we may open them to the community, after the course, in all areas and topics: requirements, technologies, development, experimentation, testing, etc.
