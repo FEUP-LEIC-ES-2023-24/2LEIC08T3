@@ -23,8 +23,8 @@ Please contact us!
 
 Thank you!
 
-- Afonso Cruz <up202006020>
-- Bruno Pereira <up202206251>
-- Eduardo Cunha <up202207126>
-- Ricardo Ramos <up202206349>
-- Tiago Ferreira <up202207311>
+- Afonso Cruz up202006020
+- Bruno Pereira up202206251
+- Eduardo Cunha up202207126
+- Ricardo Ramos up202206349
+- Tiago Ferreira up202207311
