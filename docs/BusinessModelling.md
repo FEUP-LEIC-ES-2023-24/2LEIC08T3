@@ -23,3 +23,5 @@ Our app empowers consumers to make environmentally conscious choices by providin
 - Receive notifications for new product/brand releases
 
 ### Elevator Pitch
+
+!FALTA PITCH!
