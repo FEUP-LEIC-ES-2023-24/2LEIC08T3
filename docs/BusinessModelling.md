@@ -22,3 +22,4 @@ Our app empowers consumers to make environmentally conscious choices by providin
 - Receive notifications for promotions on wishlist items.
 - Receive notifications for new product/brand releases
 
+### Elevator Pitch
