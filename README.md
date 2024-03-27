@@ -9,8 +9,8 @@ You can find here details about the GreenScan, from a high-level vision to low-l
   * [Features and Assumptions](docs/BusinessModelling.md#Features-and-Assumptions)
   * [Elevator Pitch](docs/BusinessModelling.md#Elevator-Pitch)
 * [Requirements](docs/Requirements.md)
-  * [Domain model]
-  * [Mockup]
+  * [Domain model](docs/Requirements.md#Domain-Model)
+  * [Mockup](docs/Requirements.md#Mockup)
 * [Architecture and Design]
   * [Logical architecture]
   * [Physical architecture]
