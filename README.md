@@ -5,9 +5,9 @@ Welcome to the documentation pages of the GreenScan!
 You can find here details about the GreenScan, from a high-level vision to low-level implementation decisions, a kind of Software Development Report, organized by type of activities: 
 
 * [Business Modelling](docs/BusinessModelling.md)
-  * [Product Vision](docs/BusinessModelling.md#Vision-Statement)
-  * [Features and Assumptions]
-  * [Elevator Pitch]
+  * [Product Vision](docs/BusinessModelling.md)
+  * [Features and Assumptions](docs/BusinessModelling.md)
+  * [Elevator Pitch](docs/BusinessModelling.md)
 * [Requirements]
   * [User stories]
   * [Domain model]
