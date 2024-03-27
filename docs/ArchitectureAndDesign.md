@@ -7,7 +7,7 @@
 
 ### Physical architecture
 
-!FALTA DIAGRAMA!
+![Physical Architecture](images/physical_uml.png)
 
 
 ### Vertical prototype
