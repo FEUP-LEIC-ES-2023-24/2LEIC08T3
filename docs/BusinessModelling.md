@@ -21,4 +21,4 @@ Our app empowers consumers to make environmentally conscious choices by providin
 
 ### Elevator Pitch
 
-!FALTA PITCH!
+In modern times, with a wide range of brands and products, it's tough to know if the products you buy are actually good for your health and for the health of the planet. Our app, GreenScan, changes that hard choices. With a simple barcode, you get instant acess to sustainability ratings, manufacturing details, and full information of a product's environmental impact. Plus, you can find stores near you that carry the sustainable items you want. We put the power of conscious shopping right in your pocket, helping you make informed choices that align with your values
