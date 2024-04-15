@@ -1,0 +1,263 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:greenscan/models/inventory_model.dart';
+import 'package:greenscan/models/search_model.dart';
+import 'package:greenscan/pages/menu.dart';
+import 'package:greenscan/pages/barcode.dart';
+
+// ignore: must_be_immutable
+class HomePage extends StatelessWidget {
+  HomePage({super.key});
+
+  List<SearchModel> searches = [];
+  List<InventoryModel> inventory = [];
+
+  void getSearches() {
+    searches = SearchModel.getSearch();
+  }
+
+  void getInventory() {
+    inventory = InventoryModel.getInventory();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    getSearches();
+    return Scaffold(
+      drawer: SideBar(),
+      appBar: appBar(context),
+      backgroundColor: Colors.white,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          searchMethod(),
+          const SizedBox(height: 40,),
+          SearchesMethod(),
+          const SizedBox(height: 40,),
+          InventoryMethod(),
+          const SizedBox(height:90,),
+          ScanMethod(context),
+        ],
+      )
+    );
+  }
+
+  AppBar appBar(context) {
+    return AppBar(
+      title: const Text(
+        'GreenScan',
+        style: TextStyle(
+          color: Colors.black,
+          fontSize: 35,
+          fontWeight: FontWeight.bold
+        ),
+      ),
+      centerTitle: true,
+    );
+  }
+
+  Container searchMethod() {
+    return Container(
+          margin: const EdgeInsets.only(top: 40, left: 20, right: 20),
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.11),
+                blurRadius: 40,
+                spreadRadius: 0.0
+              )
+            ]
+          ),
+          child: TextField(
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.all(15),
+              hintText: 'Search Product',
+              hintStyle: const TextStyle(
+                color: Color(0xffDDDADA),
+                fontSize: 18
+              ),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Image.asset('assets/search.png'),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(50),
+                borderSide: BorderSide.none
+              )
+            ),
+          ),
+        );
+  }
+
+  Column SearchesMethod() {
+    return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding (
+              padding: EdgeInsets.only(left:20,top:20, bottom: 30),
+              child: Text(
+                'Recent searched',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w600
+                ),
+              ),
+            ),
+            const SizedBox(height:15,),
+            Container(
+              height: 120,
+              child : ListView.separated(
+                itemCount: searches.length,
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.only(
+                  left: 20,
+                  right: 20
+                ),
+                separatorBuilder: (context, index) => const SizedBox(width: 25,),
+                itemBuilder: (context, index) {
+                  return Container(
+                    width: 150,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.green, width: 2)
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 70,
+                          height: 70,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Image.asset(searches[index].icon),   
+                          ),
+                        ),
+                        Text(
+                          searches[index].name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                            fontSize: 14
+                          )
+                        )
+                      ],
+                    )
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+  }
+
+  Column InventoryMethod() {
+    return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding (
+              padding: EdgeInsets.only(left:20,top:20, bottom: 30),
+              child: Text(
+                'Inventory',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w600
+                ),
+              ),
+            ),
+            const SizedBox(height:15,),
+            Container(
+              height: 120,
+              child : ListView.separated(
+                itemCount: searches.length,
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.only(
+                  left: 20,
+                  right: 20
+                ),
+                separatorBuilder: (context, index) => const SizedBox(width: 25,),
+                itemBuilder: (context, index) {
+                  return Container(
+                    width: 150,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.green, width: 2)
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 70,
+                          height: 70,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Image.asset(searches[index].icon),   
+                          ),
+                        ),
+                        Text(
+                          searches[index].name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                            fontSize: 14
+                          )
+                        )
+                      ],
+                    )
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+  }
+
+  Column ScanMethod(context) {
+    return Column(
+      children: [
+        const Padding (
+          padding: EdgeInsets.only(left:50),
+        ),
+      Center(  
+      child: SizedBox(
+        width: 150,
+        height: 50,
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => BarcodeReaderPage()),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+          ),
+          child: const Center(
+            child: Text(
+            'Scan',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                fontSize: 25
+              )
+            )
+          ),
+        )
+      )
+    )
+    ],
+    );    
+  }
+}
