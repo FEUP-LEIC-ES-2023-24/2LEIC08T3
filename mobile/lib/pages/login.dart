@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:greenscan/pages/home.dart';
-
+import 'package:greenscan/pages/register-page.dart';
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -105,7 +105,12 @@ class _LoginPageState extends State<LoginPage> {
                   Text('Don\'t have an account?'),
                   SizedBox(width: 10.0),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => RegisterPage()),
+                      );
+                    },
                     child: Text('Register'),
                     style: TextButton.styleFrom(
                       foregroundColor: Color(0xFF4b986c),
