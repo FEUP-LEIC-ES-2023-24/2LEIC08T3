@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:greenscan/pages/login.dart';
+import 'package:greenscan/pages/map.dart';
 
 class SideBar extends StatelessWidget {
   @override
@@ -10,7 +11,7 @@ class SideBar extends StatelessWidget {
                   children: <Widget>[
             const DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.green,
+                color: Color(0xff4b986c),
               ),
               child: Text(
                 'Menu',
@@ -53,7 +54,10 @@ class SideBar extends StatelessWidget {
               leading: const Icon(Icons.map),
               title: const Text('Map'),
               onTap: () {
-
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MapPage()),
+                );
               },
             ),
             ListTile(

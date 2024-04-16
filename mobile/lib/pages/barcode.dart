@@ -9,7 +9,13 @@ class BarcodeReaderPage extends StatefulWidget {
 class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
   String _barcodeResult = 'No barcode scanned';
 
-  Future<void> _scanBarcode() async {
+  @override
+  void initState() {
+    super.initState();
+    scanBarcode();
+  }
+
+  Future<String> scanBarcode() async {
     try {
       String barcode = await FlutterBarcodeScanner.scanBarcode(
         '#ff6666', // Cor da barra de cima da tela
@@ -18,15 +24,13 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
         ScanMode.BARCODE, // Modo de escaneamento (código de barras)
       );
 
-      if (!mounted) return; // Verifica se o widget está montado
+      if (barcode == '-1') {
+        throw Exception('No barcode scanned');
+      }
 
-      setState(() {
-        _barcodeResult = barcode;
-      });
+      return barcode;
     } catch (e) {
-      setState(() {
-        _barcodeResult = 'Erro: $e';
-      });
+      throw Exception('Erro: $e');
     }
   }
 
@@ -46,7 +50,7 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _scanBarcode,
+              onPressed: scanBarcode,
               child: Text('Scan code'),
             ),
           ],
