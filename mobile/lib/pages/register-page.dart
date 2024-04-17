@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 
+import '../Services/auth.dart';
+import '../Services/cred.dart';
+
 class RegisterPage extends StatefulWidget {
   @override
   _RegisterPageState createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _secondPasswordController = TextEditingController();
+
+  final AuthService _authService = AuthService();
+  final CredService _credService = CredService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,6 +51,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               SizedBox(height: 20.0),
               TextField(
+                controller: _emailController,
                 decoration: InputDecoration(
                   hintText: 'Email Address',
                   border: OutlineInputBorder(),
@@ -47,6 +59,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               SizedBox(height: 20.0),
               TextField(
+                controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: 'Password',
@@ -55,6 +68,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               SizedBox(height: 20.0),
               TextField(
+                controller: _secondPasswordController,
                 obscureText: true,
                 decoration: InputDecoration(
                   hintText: 'Confirm Password',
@@ -65,8 +79,13 @@ class _RegisterPageState extends State<RegisterPage> {
               SizedBox(
                 width: double.infinity, // Make button full width
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Handle registration logic here
+                  onPressed: () async {
+                    dynamic credential = await _authService.registerEmail(
+                        _emailController.text.trim(),
+                        _passwordController.text,
+                        _secondPasswordController.text
+                    );
+                    _credService.register(credential, context);
                   },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all<Color>(Color(0xff4b986c)), // Match app bar color

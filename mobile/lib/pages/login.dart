@@ -1,48 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:greenscan/Services/auth.dart';
+import 'package:greenscan/Services/cred.dart';
 import 'package:greenscan/pages/home.dart';
 import 'package:greenscan/pages/register-page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
+
 class _LoginPageState extends State<LoginPage> {
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  final String _correctEmail = 'Eduardo';
-  final String _correctPassword = '12345';
-
-  void _login(BuildContext context) {
-    String email = _emailController.text;
-    String password = _passwordController.text;
-
-    if (email == _correctEmail && password == _correctPassword) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage()),
-      );
-    }
-    else {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Invalid Credentials'),
-            content: Text('Please enter valid email and password.'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
+  final AuthService _authService = AuthService();
+  final CredService _credService = CredService();
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +63,13 @@ class _LoginPageState extends State<LoginPage> {
               ),
               SizedBox(height: 20.0),
               ElevatedButton(
-                onPressed: () => _login(context),
+                onPressed: () async {
+                  dynamic credential = await _authService.signInEmail(
+                      _emailController.text.trim(),
+                      _passwordController.text
+                  );
+                  _credService.login(credential, context);
+                },
                 child: Text('Login', style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xff4b986c),
@@ -125,3 +106,24 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
+
+/*
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Invalid Credentials'),
+            content: Text('Please enter valid email and password.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+
+       */
