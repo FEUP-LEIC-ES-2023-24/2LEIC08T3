@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:greenscan/Services/auth.dart';
 import 'package:greenscan/Services/cred.dart';
 import 'package:greenscan/pages/home.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:greenscan/pages/register-page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -32,7 +33,10 @@ class _LoginPageState extends State<LoginPage> {
               Text(
                 'Welcome to GREENSCAN!',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 36.0, color: Colors.black, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 36.0,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20.0),
               TextField(
@@ -86,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                   Text('Don\'t have an account?'),
                   SizedBox(width: 10.0),
                   TextButton(
-                    onPressed: (){
+                    onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => RegisterPage()),
@@ -106,24 +110,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-
-
-/*
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Invalid Credentials'),
-            content: Text('Please enter valid email and password.'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
-
-       */
