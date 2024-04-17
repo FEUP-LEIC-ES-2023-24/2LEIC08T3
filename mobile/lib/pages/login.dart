@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:greenscan/pages/home.dart';
+import 'package:greenscan/pages/product-detail-page.dart';
 import 'package:greenscan/pages/register-page.dart';
+
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -20,7 +22,9 @@ class _LoginPageState extends State<LoginPage> {
     if (email == _correctEmail && password == _correctPassword) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(builder: (context) => const ProductDetailPage(
+          productCode: "111",
+        )),
       );
     }
     else {
