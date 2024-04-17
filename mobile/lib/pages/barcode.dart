@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:greenscan/pages/product-detail-page.dart';
 
 class BarcodeReaderPage extends StatefulWidget {
   @override
@@ -27,6 +28,13 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
       if (barcode == '-1') {
         throw Exception('No barcode scanned');
       }
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProductDetailPage(productCode: barcode),
+        ),
+      );
 
       return barcode;
     } catch (e) {

@@ -22,9 +22,7 @@ class _LoginPageState extends State<LoginPage> {
     if (email == _correctEmail && password == _correctPassword) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const ProductDetailPage(
-          productCode: "111",
-        )),
+        MaterialPageRoute(builder: (context) => HomePage()),
       );
     }
     else {
