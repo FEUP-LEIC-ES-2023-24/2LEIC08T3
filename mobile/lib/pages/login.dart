@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:greenscan/pages/home.dart';
-import 'package:greenscan/pages/product-detail-page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:greenscan/pages/register-page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -15,22 +15,21 @@ class _LoginPageState extends State<LoginPage> {
   final String _correctEmail = 'Eduardo';
   final String _correctPassword = '12345';
 
-  void _login(BuildContext context) {
-    String email = _emailController.text;
-    String password = _passwordController.text;
-
-    if (email == _correctEmail && password == _correctPassword) {
+  _login(String email, String password) async {
+    try {
+      final credential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+        print(credential);
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
       );
-    }
-    else {
+    } on FirebaseAuthException catch (e) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Invalid Credentials'),
+            title: Text(e.code),
             content: Text('Please enter valid email and password.'),
             actions: <Widget>[
               TextButton(
@@ -59,7 +58,10 @@ class _LoginPageState extends State<LoginPage> {
               Text(
                 'Welcome to GREENSCAN!',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 36.0, color: Colors.black, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 36.0,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20.0),
               TextField(
@@ -90,7 +92,8 @@ class _LoginPageState extends State<LoginPage> {
               ),
               SizedBox(height: 20.0),
               ElevatedButton(
-                onPressed: () => _login(context),
+                onPressed: () =>
+                    _login(_emailController.text, _passwordController.text),
                 child: Text('Login', style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xff4b986c),
@@ -107,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
                   Text('Don\'t have an account?'),
                   SizedBox(width: 10.0),
                   TextButton(
-                    onPressed: (){
+                    onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => RegisterPage()),
