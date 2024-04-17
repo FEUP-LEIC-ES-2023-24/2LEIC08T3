@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:greenscan/pages/login.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); 
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(MyApp());
+}
 const MaterialColor myCustomColor = MaterialColor(
   0xff4b986c, // Your primary color's hex code as the primary value (index 500)
   <int, Color>{
