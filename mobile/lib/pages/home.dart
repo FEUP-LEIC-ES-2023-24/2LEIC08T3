@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:greenscan/pages/barcode.dart';
 import 'package:greenscan/models/inventory_model.dart';
 import 'package:greenscan/models/search_model.dart';
+import 'package:greenscan/pages/product.dart';
 import 'package:greenscan/pages/menu.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-
 
 class HomePage extends StatelessWidget {
   HomePage({Key? key}) : super(key: key);
@@ -30,7 +30,7 @@ class HomePage extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          searchMethod(),
+          searchMethod(context),
           const SizedBox(height: 40),
           SearchesMethod(),
           const SizedBox(height: 40),
@@ -56,7 +56,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Container searchMethod() {
+  Container searchMethod(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(top: 40, left: 20, right: 20),
       decoration: BoxDecoration(
@@ -78,15 +78,23 @@ class HomePage extends StatelessWidget {
             color: Color(0xffDDDADA),
             fontSize: 18,
           ),
-          suffixIcon: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Image.asset('assets/search.png'),
+          suffixIcon: const Padding(
+            padding: EdgeInsets.all(20),
+            child: Icon(Icons.search),
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(50),
             borderSide: BorderSide.none,
           ),
         ),
+        onSubmitted: (value) => {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProductDetailsPage(barcode: value),
+            ),
+          ),
+        },
       ),
     );
   }
@@ -239,7 +247,8 @@ class HomePage extends StatelessWidget {
                 if (barcodeResult != '-1') {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => BarcodeReaderPage()),
+                    MaterialPageRoute(
+                        builder: (context) => BarcodeReaderPage()),
                   );
                 }
               },
