@@ -83,12 +83,13 @@ In modern times, with a wide range of brands and products, it's tough to know if
 
 ![Vertical prototype](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/blob/main/docs/images/vertical_prototype.gif)
 
+
 # Sprint 1
 
-##Project Board Planned For Sprint 1
+## Project Board Planned For Sprint 1
 ![Bedore](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/blob/develop/docs/images/Before.png)
 
-##Project Board After Sprint 1
+## Project Board After Sprint 1
 ![After](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/blob/develop/docs/images/After.png)
 
 ## Sprint Retrospective
