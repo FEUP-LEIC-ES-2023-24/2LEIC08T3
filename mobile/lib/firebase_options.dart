@@ -30,10 +30,7 @@ class DefaultFirebaseOptions {
           'you can reconfigure this by running the FlutterFire CLI again.',
         );
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -72,4 +69,15 @@ class DefaultFirebaseOptions {
     storageBucket: 'greenscan-leic.appspot.com',
     iosBundleId: 'com.example.greenscan',
   );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyCrvzBIpJn3KwH1lezDeUZpX3VvaFjIGIo',
+    appId: '1:520988089739:web:b27ee65d2388ebbafbe38e',
+    messagingSenderId: '520988089739',
+    projectId: 'greenscan-leic',
+    authDomain: 'greenscan-leic.firebaseapp.com',
+    storageBucket: 'greenscan-leic.appspot.com',
+    measurementId: 'G-8L1KTWD17X',
+  );
+
 }
