@@ -28,6 +28,7 @@ class ProductDetails {
   final String category;
   final String country;
   final List<String> materials;
+  final String search;
 
   ProductDetails({
     required this.sustainableScore,
@@ -40,6 +41,8 @@ class ProductDetails {
     required this.category,
     required this.country,
     required this.materials,
+    required this.search
+
   });
 
   factory ProductDetails.fromFirestore(Map<String, dynamic> data) {
@@ -54,6 +57,7 @@ class ProductDetails {
       category: data['category'] ?? 'Unknown Category',
       country: data['country'] ?? 'Unknown Country',
       materials: List<String>.from(data['materials'] as List<dynamic> ?? []),
+      search: data['search'] ?? '' 
     );
   }
 
@@ -78,6 +82,7 @@ class ProductDetails {
       category: category ?? this.category,
       country: country ?? this.country,
       materials: materials ?? this.materials,
+      search: search ?? this.search,
     );
   }
 }
@@ -97,7 +102,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   bool isLoading = true;
   ProductDetails productDetails = ProductDetails(
       sustainableScore: 0, transportScore: 0, materialScore: 0,
-      name: '', brand: '', imageUrl: '', category: '', country: '', materials: []);
+      name: '', brand: '', imageUrl: '', category: '', country: '', materials: [], search: '');
 
   @override
   void initState() {

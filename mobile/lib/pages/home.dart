@@ -20,24 +20,26 @@ class HomePage extends StatelessWidget {
     inventory = InventoryModel.getInventory();
   }
 
-  @override
+@override
   Widget build(BuildContext context) {
     getSearches();
     return Scaffold(
       drawer: SideBar(),
       appBar: appBar(context),
       backgroundColor: Colors.white,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          searchMethod(context),
-          const SizedBox(height: 40),
-          SearchesMethod(),
-          const SizedBox(height: 40),
-          InventoryMethod(),
-          const SizedBox(height: 90),
-          ScanMethod(context),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            searchMethod(context),
+            const SizedBox(height: 40),
+            SearchesMethod(),
+            const SizedBox(height: 40),
+            InventoryMethod(),
+            const SizedBox(height: 90),
+            ScanMethod(context),
+          ],
+        ),
       ),
     );
   }
