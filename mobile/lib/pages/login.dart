@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:greenscan/pages/home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:greenscan/pages/product-detail-page.dart';
 import 'package:greenscan/pages/register-page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -22,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
         print(credential);
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(builder: (context) => const ProductDetailPage(productCode: "111")),
       );
     } on FirebaseAuthException catch (e) {
       showDialog(
