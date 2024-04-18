@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:greenscan/pages/barcode.dart';
 import 'package:greenscan/pages/login.dart';
 import 'package:greenscan/pages/map.dart';
 
@@ -21,6 +22,16 @@ class SideBar extends StatelessWidget {
                   fontWeight: FontWeight.w600
                 ),
               ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.scanner),
+              title: const Text('Scan'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => BarcodeReaderPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.inventory),
