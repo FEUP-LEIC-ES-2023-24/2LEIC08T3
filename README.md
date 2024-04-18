@@ -75,7 +75,7 @@ In modern times, with a wide range of brands and products, it's tough to know if
 
 ### Physical architecture
 
-![Physical Architecture](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/blob/main/docs/images/physical_uml.png)
+![Physical Architecture](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/blob/main/docs/images/vertical_prototype.gif)
 
 
 ### Vertical prototype
