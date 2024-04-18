@@ -81,3 +81,19 @@ In modern times, with a wide range of brands and products, it's tough to know if
 ### Vertical prototype
 
 ![Vertical prototype](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/blob/main/docs/images/vertical_prototype.gif)
+
+
+# Sprint Retrospective
+## Sprint 1
+During the Sprint 1, and despite many challenges, our team managed to complete most of the user stories and features we had planned, namely the user authentication system, an homepage, a location service, a loading page, the search of products, as well as viewing their details, all while integrating our Firebase database, populating it and making the necessary connections. Some scoring criteria for products was also implemented. Since this was the first sprint and the first time doing hands-on on a real project and using real-world practises, and we found it a bit difficult and faced some challenges. To summarize:
+### The Good
+We managed to complete most of our planned features, and we're satisfied with the work we put in to refine some features and pages. We managed to grasp the basics of Flutter/Dart, while also designing the pages and making sure that the client gets a good user experience. 
+### The Bad
+Overall, we struggled more with scrum/agile/sprint-planning techniques, and think that our work could've been better coordinated. Some user-stories weren't specific enough, and we'll need to work a little more on that.
+### User Stories concluded
+- [#6: As a app user, I want to login into my account](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/6)
+- [#2: As a app user, I want to be able to search for products by bar code](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/2)
+- [#4: As a app user, I want to create and register an account](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/4)
+- [#5: As a app user, I want to consult detailed information about a product](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/5)
+- [#3: As an app user, I want to be able to search for products by name](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/3)
+
