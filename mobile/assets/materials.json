@@ -1,0 +1,44 @@
+{
+  "paper": {
+    "recyclability": 100
+  },
+  "cardboard": {
+    "recyclability": 100
+  },
+  "glass": {
+    "recyclability": 80
+  },
+  "aluminum": {
+    "recyclability": 75
+  },
+  "steel": {
+    "recyclability": 75
+  },
+  "plastic-pet": {
+    "recyclability": 75
+  },
+  "plastic-hdpe": {
+    "recyclability": 65
+  },
+  "plastic-pvc": {
+    "recyclability": 25
+  },
+  "plastic-ldpe": {
+    "recyclability": 20
+  },
+  "plastic-pp": {
+    "recyclability": 25
+  },
+  "plastic-ps": {
+    "recyclability": 10
+  },
+  "mixed": {
+    "recyclability": 10
+  },
+  "bioplastics": {
+    "recyclability": 50
+  },
+  "biodegradable": {
+    "recyclability": 100
+  }
+}

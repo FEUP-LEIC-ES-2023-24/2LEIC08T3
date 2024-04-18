@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "520988089739",
+    "project_id": "greenscan-leic",
+    "storage_bucket": "greenscan-leic.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:520988089739:android:56552ce969622d61fbe38e",
+        "android_client_info": {
+          "package_name": "com.example.greenscan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLXQdNEfUuGLv92dXsbWGAYDgFiRx4cEM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
