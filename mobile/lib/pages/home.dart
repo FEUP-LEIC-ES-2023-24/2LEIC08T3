@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:greenscan/pages/barcode.dart';
 import 'package:greenscan/models/inventory_model.dart';
 import 'package:greenscan/models/search_model.dart';
-import 'package:greenscan/pages/product.dart';
+import 'package:greenscan/pages/product-detail-page.dart';
 import 'package:greenscan/pages/menu.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
@@ -91,7 +91,7 @@ class HomePage extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ProductDetailsPage(barcode: value),
+              builder: (context) => ProductDetailPage(productCode: value),
             ),
           ),
         },

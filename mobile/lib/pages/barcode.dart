@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:greenscan/pages/product-detail-page.dart';
-import 'package:greenscan/pages/product.dart';
 
 class BarcodeReaderPage extends StatefulWidget {
   @override
@@ -39,23 +38,16 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
 
       return barcode;
     } catch (e) {
-      throw Exception('Erro: $e');
+      
     }
+
+    return "";
   }
   void getFromDatabase(String barcode) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProductDetailsPage(barcode: barcode),
-      ),
-    );
-  }
-
-  void addToDatabase(String barcode) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CreateProductPage(barcode: barcode),
+        builder: (context) => ProductDetailPage(productCode: barcode),
       ),
     );
   }
@@ -90,20 +82,10 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
               ),
             ),
             SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-              ElevatedButton(
-                onPressed: () => addToDatabase(_barcodeResult),
-                child: Text('Add to Database'),
-                ),
-                SizedBox(width: 10),
-                ElevatedButton(
+            ElevatedButton(
                 onPressed: () => getFromDatabase(_barcodeResult),
                 child: Text('Get from Database'),
                 ),
-              ],
-            ),
           ],
         ),
       ),

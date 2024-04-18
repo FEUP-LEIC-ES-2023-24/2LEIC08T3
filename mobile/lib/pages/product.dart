@@ -44,6 +44,7 @@ class Product {
   }
 }
 
+
 class ProductDetailsPage extends StatefulWidget {
   final String barcode;
 

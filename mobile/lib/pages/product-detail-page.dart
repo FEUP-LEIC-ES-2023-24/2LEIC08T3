@@ -9,7 +9,6 @@ class ProductDetailPage extends StatefulWidget {
   final String productCode;
 
   const ProductDetailPage({
-    super.key,
     required this.productCode,
   });
 
