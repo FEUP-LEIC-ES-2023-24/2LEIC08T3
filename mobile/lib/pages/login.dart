@@ -23,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
         print(credential);
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const ProductDetailPage(productCode: "111")),
+        MaterialPageRoute(builder: (context) => HomePage()),
       );
     } on FirebaseAuthException catch (e) {
       showDialog(
