@@ -1,9 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:greenscan/Services/database.dart';
 import 'package:greenscan/components/loading_screen.dart';
 
 import '../utils/location_services.dart';
 import '../utils/score_calculation.dart';
+
+import 'package:greenscan/Services/product.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final String productCode;
@@ -14,77 +16,6 @@ class ProductDetailPage extends StatefulWidget {
 
   @override
   _ProductDetailPageState createState() => _ProductDetailPageState();
-}
-
-class ProductDetails {
-  // SCORES
-  final int sustainableScore;
-  final int transportScore;
-  final int materialScore;
-
-  final String name;
-  final String brand;
-  final String imageUrl;
-  final String category;
-  final String country;
-  final List<String> materials;
-  final String search;
-
-  ProductDetails({
-    required this.sustainableScore,
-    required this.transportScore,
-    required this.materialScore,
-
-    required this.name,
-    required this.brand,
-    required this.imageUrl,
-    required this.category,
-    required this.country,
-    required this.materials,
-    required this.search
-
-  });
-
-  factory ProductDetails.fromFirestore(Map<String, dynamic> data) {
-    return ProductDetails(
-      sustainableScore: data['sustainableScore'] ?? 0, // if -1, means it hasn't been calculated
-      transportScore: data['transportScore'] ?? 0,
-      materialScore: data['materialScore'] ?? 0,
-
-      name: data['name'] ?? 'Unknown Product',
-      brand: data['brand'] ?? 'Unknown Brand',
-      imageUrl: data['imageUrl'] ?? 'default_image_url',
-      category: data['category'] ?? 'Unknown Category',
-      country: data['country'] ?? 'Unknown Country',
-      materials: List<String>.from(data['materials'] as List<dynamic> ?? []),
-      search: data['search'] ?? '' 
-    );
-  }
-
-  ProductDetails copyWith({
-    int? sustainableScore,
-    int? transportScore,
-    int? materialScore,
-    String? name,
-    String? brand,
-    String? imageUrl,
-    String? category,
-    String? country,
-    List<String>? materials
-  }) {
-    return ProductDetails(
-      sustainableScore: sustainableScore ?? this.sustainableScore,
-      transportScore: transportScore ?? this.transportScore,
-      materialScore: materialScore ?? this.materialScore,
-      name: name ?? this.name,
-      brand: brand ?? this.brand,
-      imageUrl: imageUrl ?? this.imageUrl,
-      category: category ?? this.category,
-      country: country ?? this.country,
-      materials: materials ?? this.materials,
-      search: search ?? this.search,
-    );
-  }
 }
 
 enum Practice { good, average, bad, unknown, info }
@@ -100,59 +31,34 @@ class EvaluationContainer {
 class _ProductDetailPageState extends State<ProductDetailPage> {
   double progress = 0;
   bool isLoading = true;
-  ProductDetails productDetails = ProductDetails(
-      sustainableScore: 0, transportScore: 0, materialScore: 0,
-      name: '', brand: '', imageUrl: '', category: '', country: '', materials: [], search: '');
+  Product product = Product(
+  sustainableScore: 0, transportScore: 0, materialScore: 0,
+  name: '', brand: '', imageUrl: '', category: '', country: '', materials: [], search: '');
 
   @override
   void initState() {
     super.initState();
-    fetchProductDetails();
     LocationService.requestLocationPermission();
     ScoreCalculation.loadMaterialScores();
+    fetchProduct();
   }
 
-  Future<void> fetchProductDetails() async {
+  Future<void> fetchProduct() async {
     try {
-      DocumentSnapshot snapshot = await FirebaseFirestore.instance
-          .collection('items')
-          .doc(widget.productCode)
-          .get();
-
-      if (snapshot.exists) {
-        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
-        productDetails = ProductDetails.fromFirestore(data);
-
-        if (productDetails.transportScore == -1) {
-          double? distance = await LocationService.getDistanceToCountry(productDetails.country);
-          if (distance != null) {
-            double calculatedScore = ScoreCalculation.computeTransportScore(distance);
-            productDetails = productDetails.copyWith(transportScore: calculatedScore.truncate());
-          }
-        }
-
-        print(ScoreCalculation.getMaterialRecyclability(productDetails.materials[0]));
-        if (productDetails.materialScore == -1) {
-          int score = ScoreCalculation.getMaterialRecyclability(productDetails.materials[0]);
-          productDetails = productDetails.copyWith(materialScore: score);
-
-        }
-        
-        setState(() {
-          progress = productDetails.sustainableScore / 100;
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      var fetchedProduct = await DataBase.firebaseGetProduct(widget.productCode);
+      setState(() {
+        product = fetchedProduct;
+        isLoading = false;
+      });
     } catch (e) {
-      print('Error fetching product details: $e');
+      print('Error fetching product: $e');
+      // Handle the error gracefully, e.g., show an error message
       setState(() {
         isLoading = false;
       });
     }
+
+    print("////"+product.name);
   }
 
   Color getSustainabilityColor(int score) {
@@ -268,18 +174,18 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     EvaluationContainer productInfo = EvaluationContainer(
         "Info",
         Practice.info,
-        ['Name : ${productDetails.name}', 'Company: ${productDetails.brand}', 'Category: ${productDetails.category}', 'Code: ${widget.productCode}']);
+        ['Name : ${product.name}', 'Company: ${product.brand}', 'Category: ${product.category}', 'Code: ${widget.productCode}']);
 
     List<EvaluationContainer> evaluations = [
       EvaluationContainer(
         "Transport",
-        getPracticeFromScore(productDetails.transportScore),
-        ['Score: ${productDetails.transportScore}', "Country of Origin: ${productDetails.country}", "Delivery is efficient", "Packaging is minimal"],
+        getPracticeFromScore(product.transportScore),
+        ['Score: ${product.transportScore}', "Country of Origin: ${product.country}", "Delivery is efficient", "Packaging is minimal"],
       ),
       EvaluationContainer(
         "Materials",
-        getPracticeFromScore(productDetails.materialScore),
-        ["Score: ${productDetails.materialScore}", "Material type: ${productDetails.materials}", "Very Recyclable"],
+        getPracticeFromScore(product.materialScore),
+        ["Score: ${product.materialScore}", "Material type: ${product.materials}", "Very Recyclable"],
       ),
       EvaluationContainer(
         "Labels",
@@ -302,7 +208,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(productDetails.name),
+        title: Text(product.name),
         backgroundColor: Colors.green,
         elevation: 0,
       ),
@@ -311,7 +217,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Image.network(
-              productDetails.imageUrl,
+              product.imageUrl,
               width: double.infinity,
               height: 200,
               fit: BoxFit.cover,
@@ -319,7 +225,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                productDetails.name,
+                product.name,
                 style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -361,7 +267,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                             value: value,
                                             strokeWidth: 10,
                                             backgroundColor: Colors.grey[200],
-                                            color: getSustainabilityColor(productDetails.sustainableScore),
+                                            color: getSustainabilityColor(product.sustainableScore),
                                           ),
                                         ),
                                       ),
@@ -381,7 +287,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             ),
                           ),
                           Text(
-                            '${productDetails.sustainableScore.toInt()}%',
+                            '${product.sustainableScore.toInt()}%',
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -397,7 +303,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       child: Align(
                         alignment: Alignment.center,
                         child: Text(
-                          getImpactString(productDetails.sustainableScore),
+                          getImpactString(product.sustainableScore),
                           style: const TextStyle(
                             color: Colors.black87,
                             fontWeight: FontWeight.bold,
