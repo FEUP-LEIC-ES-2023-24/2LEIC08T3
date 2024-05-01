@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:greenscan/Services/cred.dart';
 import 'package:greenscan/Services/firebase.dart';
 import 'package:greenscan/Services/dbUser.dart';
+import 'package:greenscan/Services/product.dart';
 
 class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -44,7 +45,7 @@ class AuthService {
     UserCredential credential;
 
     try {
-       credential = await _auth.createUserWithEmailAndPassword(
+      credential = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
     } catch (e) {
       e as FirebaseAuthException;
@@ -58,13 +59,13 @@ class AuthService {
       await user!.updateDisplayName(userName);
     } catch (e) {
       if (kDebugMode) {
-        print (e);
+        print(e);
       }
     }
 
     dbUser = DbUser(name: userName, email: email);
     await DataBase.firebaseAddUser();
 
-    CredService.register(user, context);
+    CredService.register(context);
   }
 }

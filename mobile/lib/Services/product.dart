@@ -2,108 +2,100 @@ import 'package:greenscan/utils/score_calculation.dart';
 import 'package:greenscan/utils/location_services.dart';
 
 class Product {
-  // SCORES
+  // calculate runtime
   final int sustainableScore;
   final int transportScore;
   final int materialScore;
 
+  //from database
   final String name;
   final String brand;
   final String imageUrl;
   final String category;
   final String country;
-  final List<String> materials;
   final String search;
+  final List<String> materials;
+  final List<String> labels;
+  //final List<Store> stores; TODO
 
-  Product({
-    required this.sustainableScore,
-    required this.transportScore,
-    required this.materialScore,
+  Product(
+      {required this.sustainableScore,
+      required this.transportScore,
+      required this.materialScore,
+      required this.name,
+      required this.brand,
+      required this.imageUrl,
+      required this.category,
+      required this.country,
+      required this.search,
+      required this.materials,
+      required this.labels});
+      //required this.stores TODO
 
-    required this.name,
-    required this.brand,
-    required this.imageUrl,
-    required this.category,
-    required this.country,
-    required this.materials,
-    required this.search
-  });
+  static Future<Product?> buildProductDB(Map<String, dynamic>? data) async {
+    if (data == null) return null;
 
+    if (!(data.containsKey("brand") ||
+        data.containsKey("category") ||
+        data.containsKey("country") ||
+        data.containsKey("imageUrl") ||
+        data.containsKey("labels") ||
+        data.containsKey("materials") ||
+        data.containsKey("name") ||
+        data.containsKey("search") ||
+        data.containsKey("stores"))) return null;
 
-  static Future<Product> buildProductDB(Map<String, dynamic> data) async {
+    int transportScore_ = 0;
+    int materialScore_ = 0;
+    int sustainableScore_ = 0;
 
-    var transportScore_ = data['transportScore'];
-    var materialScore_ = data['materialScore'];
     final country_ = data['country'];
-    final materials_ = List<String>.from(data['materials'] as List<dynamic> ?? []);
+    final materials_ = (data['materials'] as List<dynamic> ?? [])
+        .where((material) => material is String)
+        .cast<String>()
+        .toList();
+    final labels_ = (data['labels'] as List<dynamic> ?? [])
+        .where((labels) => labels is String)
+        .cast<String>()
+        .toList();
+    /*TODO
+    final stores_ = (data['stores'] as List<dynamic> ?? [])
+        .where((stores) => labels is String)
+        .cast<String>()
+        .toList();
+     */
 
-    if (transportScore_ < 0 || transportScore_ > 100) {
-      double? distance;
-      try {
-        distance = await LocationService.getDistanceToCountry(country_);
-        if (distance == null) {
-          throw Exception("invalid distance");
-        }
-        transportScore_ = ScoreCalculation.computeTransportScore(distance);
-      } catch (error) {
-        throw Exception("Error calculating transport score: $error");
+    double? distance;
+    try {
+      distance = await LocationService.getDistanceToCountry(country_);
+      if (distance == null) {
+        print("invalid distance");
+        return null;
       }
+      transportScore_ = ScoreCalculation.computeTransportScore(distance).toInt();
+    } catch (error) {
+      print("Error calculating transport score: $error");
+      return null;
     }
 
-    if (materialScore_ < 0 || materialScore_ > 100) {
-      if (materials_.isEmpty) throw Exception("materials empty");
+    //TODO
+    //materialScore_ = func(materials,...)
 
-      for (var material in materials_) {
-        materialScore_ += ScoreCalculation.getMaterialRecyclability(material);
-      }
-      materialScore_ /= materials_.length;
-    }
-
-    if (transportScore_ is double) {
-      transportScore_ = transportScore_.toInt();
-    }
-
-    if (materialScore_ is double) {
-      materialScore_ = (materialScore_ + 1).toInt();
-    }
+    //TODO
+    //sustainableScore_ = func(materialScore_, transportationScore_...)
 
     return Product(
-        sustainableScore: data['sustainableScore'] ?? 0, // if -1, means it hasn't been calculated
-        transportScore: transportScore_ ?? 0,
-        materialScore: materialScore_ ?? 0,
-
-        name: data['name'] ?? 'Unknown Product',
-        brand: data['brand'] ?? 'Unknown Brand',
-        imageUrl: data['imageUrl'] ?? 'default_image_url',
-        category: data['category'] ?? 'Unknown Category',
-        country: country_ ?? 'Unknown Country',
+        sustainableScore: sustainableScore_,
+        transportScore: transportScore_,
+        materialScore: materialScore_,
+        name: data['name'],
+        brand: data['brand'],
+        imageUrl: data['imageUrl'],
+        category: data['category'],
+        country: country_,
+        search: data['search'],
         materials: materials_,
-        search: data['search'] ?? ''
-    );
-  }
-
-  Product copyWith({
-    int? sustainableScore,
-    int? transportScore,
-    int? materialScore,
-    String? name,
-    String? brand,
-    String? imageUrl,
-    String? category,
-    String? country,
-    List<String>? materials
-  }) {
-    return Product(
-      sustainableScore: sustainableScore ?? this.sustainableScore,
-      transportScore: transportScore ?? this.transportScore,
-      materialScore: materialScore ?? this.materialScore,
-      name: name ?? this.name,
-      brand: brand ?? this.brand,
-      imageUrl: imageUrl ?? this.imageUrl,
-      category: category ?? this.category,
-      country: country ?? this.country,
-      materials: materials ?? this.materials,
-      search: search ?? this.search,
-    );
+        labels: labels_);
+    //stores = stores_ TODO
   }
 }

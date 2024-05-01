@@ -32,8 +32,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   double progress = 0;
   bool isLoading = true;
   Product product = Product(
-  sustainableScore: 0, transportScore: 0, materialScore: 0,
-  name: '', brand: '', imageUrl: '', category: '', country: '', materials: [], search: '');
+      sustainableScore: 0,
+      transportScore: 0,
+      materialScore: 0,
+      name: "name",
+      brand: "brand",
+      imageUrl: "imageUrl",
+      category: "category",
+      country: "country",
+      search: "search",
+      materials: ["materials"],
+      labels: ["labels"]);
 
   @override
   void initState() {
@@ -45,7 +54,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   Future<void> fetchProduct() async {
     try {
-      var fetchedProduct = await DataBase.firebaseGetProduct(widget.productCode);
+      var fetchedProduct =
+          await DataBase.firebaseGetProduct(widget.productCode);
       setState(() {
         product = fetchedProduct;
         isLoading = false;
@@ -56,7 +66,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         isLoading = false;
       });
     }
-
   }
 
   Color getSustainabilityColor(int score) {
@@ -140,9 +149,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               style: const TextStyle(
                   color: Colors.black87,
                   fontSize: 20,
-                  fontWeight: FontWeight.bold
-              )
-          ),
+                  fontWeight: FontWeight.bold)),
           childrenPadding: const EdgeInsets.all(6.0),
           children: evaluation.comments
               .map((comment) => Padding(
@@ -169,29 +176,38 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   @override
   Widget build(BuildContext context) {
     /* TODO: TEMPS TO BE REPLACED BY FIREBASE DATA */
-    EvaluationContainer productInfo = EvaluationContainer(
-        "Info",
-        Practice.info,
-        ['Name : ${product.name}', 'Company: ${product.brand}', 'Category: ${product.category}', 'Code: ${widget.productCode}']);
+    EvaluationContainer productInfo =
+        EvaluationContainer("Info", Practice.info, [
+      'Name : ${product.name}',
+      'Company: ${product.brand}',
+      'Category: ${product.category}',
+      'Code: ${widget.productCode}'
+    ]);
 
     List<EvaluationContainer> evaluations = [
       EvaluationContainer(
         "Transport",
         getPracticeFromScore(product.transportScore),
-        ['Score: ${product.transportScore}', "Country of Origin: ${product.country}", "Delivery is efficient", "Packaging is minimal"],
+        [
+          'Score: ${product.transportScore}',
+          "Country of Origin: ${product.country}",
+          "Delivery is efficient",
+          "Packaging is minimal"
+        ],
       ),
       EvaluationContainer(
         "Materials",
         getPracticeFromScore(product.materialScore),
-        ["Score: ${product.materialScore}", "Material type: ${product.materials}", "Very Recyclable"],
+        [
+          "Score: ${product.materialScore}",
+          "Material type: ${product.materials}",
+          "Very Recyclable"
+        ],
       ),
       EvaluationContainer(
         "Labels",
         Practice.bad,
-        [
-          "Certifications are lacking",
-          "Incomplete product information"
-        ],
+        ["Certifications are lacking", "Incomplete product information"],
       ),
     ];
 
@@ -227,8 +243,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color:
-                      Colors.black87,
+                  color: Colors.black87,
                 ),
               ),
             ),
@@ -258,23 +273,27 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                       TweenAnimationBuilder<double>(
                                         tween: Tween(begin: 0, end: progress),
                                         duration: const Duration(seconds: 2),
-                                        builder: (context, value, child) => SizedBox(
+                                        builder: (context, value, child) =>
+                                            SizedBox(
                                           width: 100,
                                           height: 100,
                                           child: CircularProgressIndicator(
                                             value: value,
                                             strokeWidth: 10,
                                             backgroundColor: Colors.grey[200],
-                                            color: getSustainabilityColor(product.sustainableScore),
+                                            color: getSustainabilityColor(
+                                                product.sustainableScore),
                                           ),
                                         ),
                                       ),
                                       AnimatedSwitcher(
                                         duration: const Duration(seconds: 2),
-                                        transitionBuilder: (Widget child, Animation<double> animation) {
+                                        transitionBuilder: (Widget child,
+                                            Animation<double> animation) {
                                           return FadeTransition(
                                             opacity: animation,
-                                            child: ScaleTransition(scale: animation, child: child),
+                                            child: ScaleTransition(
+                                                scale: animation, child: child),
                                           );
                                         },
                                       ),
@@ -335,8 +354,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children:
-                    evaluationWidgets,
+                children: evaluationWidgets,
               ),
             ),
             const SizedBox(height: 32),

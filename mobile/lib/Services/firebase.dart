@@ -34,14 +34,34 @@ class DataBase {
     AuthService.dbUser = await DbUser.buildUserDB(data);
   }
 
+  static Future<dynamic> firebaseAddProduct(id, Product product) async {
+    final docToAdd = <String, dynamic>{
+      "brand": product.brand,
+      "category": product.category,
+      "country": product.country,
+      "imageUrl": product.imageUrl,
+      "labels": product.labels,
+      "materials": product.materials,
+      "name": product.name,
+      "search": product.search
+      //"stores": product.stores TODO
+    };
+
+    await db
+        .collection("items")
+        .doc(id)
+        .set(docToAdd)
+        .onError((e, _) => print("Error writing document: $e"));
+  }
+
   static Future<dynamic> firebaseGetProduct(id) async {
     final itemRef = db.collection("items").doc(id.toString().trim());
 
-    var data;
+    Map<String, dynamic>? data;
 
     await itemRef.get().then(
       (DocumentSnapshot doc) {
-        data = doc.data() as Map<String, dynamic>;
+        data = doc.data() as Map<String, dynamic>?;
       },
       onError: (e) => print("Error getting document: $e"),
     );

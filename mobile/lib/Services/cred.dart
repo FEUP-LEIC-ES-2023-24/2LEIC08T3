@@ -54,45 +54,28 @@ class CredService {
     );
   }
 
-  static void register(dynamic credential, context) {
-    if (credential.runtimeType != User) {
-      FirebaseAuthException error = credential as FirebaseAuthException;
-
+  static void register(context) {
+    if (AuthService.dbUser == null) {
       if (kDebugMode) {
-        print('error registering in');
-        print(error.toString());
-        print(error.runtimeType);
+        print("error getting firestore user");
       }
-
-      String errorText = error.message.toString();
-      if (error.code == "unknown-error") errorText = "Invalid inputs";
-
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Invalid Credentials'),
-              content: Text(errorText),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('OK'),
-                ),
-              ],
-            );
-          });
-    } else {
-      if (kDebugMode) {
-        print("successful registered");
-        print(credential);
-      }
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage()),
-      );
+      showErrorMsg(
+          context, "Database Error", "There was an error in the database");
+      return;
     }
+
+    if (AuthService.user == null) {
+      if (kDebugMode) {
+        print("error getting authentication user");
+      }
+      showErrorMsg(
+          context, "Database Error", "There was an error in the database");
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => HomePage()),
+    );
   }
 }
