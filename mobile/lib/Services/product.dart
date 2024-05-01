@@ -30,7 +30,7 @@ class Product {
   });
 
 
-  static Future<Product> buildProduct(Map<String, dynamic> data) async {
+  static Future<Product> buildProductDB(Map<String, dynamic> data) async {
 
     var transportScore_ = data['transportScore'];
     var materialScore_ = data['materialScore'];

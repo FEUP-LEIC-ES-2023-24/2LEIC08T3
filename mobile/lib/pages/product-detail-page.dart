@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:greenscan/Services/database.dart';
+import 'package:greenscan/Services/firebase.dart';
 import 'package:greenscan/components/loading_screen.dart';
 
 import '../utils/location_services.dart';
@@ -52,13 +52,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       });
     } catch (e) {
       print('Error fetching product: $e');
-      // Handle the error gracefully, e.g., show an error message
       setState(() {
         isLoading = false;
       });
     }
 
-    print("////"+product.name);
   }
 
   Color getSustainabilityColor(int score) {
