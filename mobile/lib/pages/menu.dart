@@ -78,7 +78,7 @@ class SideBar extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SearchSuperPage()),
+                  MaterialPageRoute(builder: (context) => SearchPlacesScreen()),
                 );
               },
             ),
