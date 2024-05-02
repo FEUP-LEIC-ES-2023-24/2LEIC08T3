@@ -14,7 +14,7 @@ class ProductDetailPage extends StatefulWidget {
   final String productCode;
   User user;
 
-  ProductDetailPage({required this.productCode, required this.user});
+  ProductDetailPage({super.key, required this.productCode, required this.user});
 
   @override
   _ProductDetailPageState createState() => _ProductDetailPageState();
@@ -94,7 +94,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       var fetchedProduct = await DataBase.firebaseGetProduct(widget.productCode);
       if (fetchedProduct == null) {
         Navigator.push(context,
-            MaterialPageRoute(builder: (context) => ProductNotFoundPage()));
+            MaterialPageRoute(builder: (context) => const ProductNotFoundPage()));
       } else {
         setState(() {
           product = fetchedProduct;
@@ -225,41 +225,67 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     IconData icon_ = getIconForPractice(getPracticeType(labels.length));
     Color color_ = getColorForPractice(getPracticeType(labels.length));
 
-    List<Widget> labelEntries = labels.map((label) {
-      String description = ScoreCalculation.getLabelDescription(label);
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 15.0),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/labels/${label.toLowerCase()}.png',
-                  width: 100,
-                  height: 100,
-                ),
-                const SizedBox(width: 15),
-                const Icon(Icons.check_circle, color: Colors.green, size: 28),
-              ],
-            ),
-            SizedBox(height: 15),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                description,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.black87,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ],
+    List<Widget> labelEntries = [];
+    if (labels.isEmpty) {
+      labelEntries.add(
+        const ListTile(
+          contentPadding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 10),
+          title: Text(
+            "• No labels found",
+            style: TextStyle(fontSize: 18, color: Colors.black87),
+          ),
         ),
       );
-    }).toList();
+    } else {
+      for (int i = 0; i < labels.length; i++) {
+        String label = labels[i];
+        String description = ScoreCalculation.getLabelDescription(label);
+        labelEntries.add(
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Stack(
+                        clipBehavior: Clip.none,
+                        alignment: Alignment.topCenter,
+                        children: [
+                          Image.asset(
+                            'assets/labels/${label.toLowerCase()}.png',
+                            width: 90,
+                            height: 90,
+                          ),
+                          const Positioned(
+                            top: -35,
+                            child: Icon(Icons.check_circle, color: Colors.green, size: 24),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 15),
+                      Expanded(
+                        child: Text(
+                          description,
+                          style: const TextStyle(
+                            color: Colors.black87,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (i < labels.length - 1)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Divider(color: Colors.grey),
+                  ),
+              ],
+            )
+        );
+      }
+    }
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 500),
