@@ -8,6 +8,9 @@ class Store {
 
   Store({required this.name, required this.location});
 
+    double get latitude => location.latitude;
+    double get longitude => location.longitude;
+
   static Future<Store?> buildStoreDB(Map<String, dynamic>? data) async {
     if (data == null) return null;
 
