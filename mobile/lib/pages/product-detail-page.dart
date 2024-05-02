@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:greenscan/Services/firebase.dart';
 import 'package:greenscan/components/loading_screen.dart';
+import 'package:greenscan/pages/google-maps.dart';
 
 import '../Services/store.dart';
 import '../utils/location_services.dart';
@@ -83,24 +85,36 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 
   void _showStoreSelection(List<Store> stores) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Available Stores'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min, // Keep dialog compact
-          children: [
-            // Show stores based on the fetched data
-            for (var store in stores)
-              ListTile(
-                title: Text(store.name),
-                subtitle: Text(store.location.toString()),
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Available Stores'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min, // Keep dialog compact
+        children: [
+          // Show stores based on the fetched data
+          for (var store in stores)
+            ListTile(
+              leading: IconButton(
+                icon: Icon(Icons.store), // Change this to your desired icon
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GoogleMapsPage(
+                        storePosition: LatLng(store.latitude, store.longitude),
+                      ),
+                    ),
+                  );
+                },
               ),
-          ],
-        ),
+              title: Text(store.name),
+            ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Color getSustainabilityColor(int score) {
     if (score >= 50) {
@@ -401,15 +415,32 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 children: evaluationWidgets,
               ),
             ),
-            const SizedBox(height: 32),
-
-            ElevatedButton(
-              onPressed: () async {
-                List<Store> stores = await product.getProductStores();
-                _showStoreSelection(stores);
-              },
-              child: const Text('Escolher Loja'),
-            ),
+            const SizedBox(height: 25),
+            Center(
+              child: SizedBox(
+                width: 220,
+                height: 50,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      List<Store> stores = await product.getProductStores();
+                      _showStoreSelection(stores);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      ),
+                    child: const Center(
+                      child: Text(
+                        'Available Stores',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),  
+              ),
+            ),  
+            const SizedBox(height: 10),    
           ],
         ),
       ),
