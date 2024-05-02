@@ -44,17 +44,18 @@ class SideBar extends StatelessWidget {
                 }  
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.inventory),
-              title: const Text('Add Product'),
-              onTap: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const AddProductPage()),
-                );
-              },
-            ),
+            if (true) // TODO: Add conditional for add user 
+              ListTile(
+                leading: const Icon(Icons.inventory),
+                title: const Text('Add Product'),
+                onTap: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const AddProductPage()),
+                  );
+                },
+              ),
             ListTile(
               leading: const Icon(Icons.card_giftcard),
               title: const Text('Whislist'),
