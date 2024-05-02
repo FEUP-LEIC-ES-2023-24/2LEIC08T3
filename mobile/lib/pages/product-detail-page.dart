@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:greenscan/Services/firebase.dart';
 import 'package:greenscan/components/loading_screen.dart';
 import 'package:greenscan/pages/google-maps.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 import '../Services/store.dart';
 import '../utils/location_services.dart';
@@ -36,6 +37,7 @@ class EvaluationContainer {
 class _ProductDetailPageState extends State<ProductDetailPage> {
   double progress = 0;
   bool isLoading = true;
+  double rating = 3;
 
   Product product = Product(
       sustainableScore: 0,
@@ -413,6 +415,43 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: evaluationWidgets,
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Center(
+              child: Text(
+                "Rate This Product",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  RatingBar.builder(
+                    initialRating: rating,
+                    minRating: 1,
+                    direction: Axis.horizontal,
+                    allowHalfRating: true,
+                    itemCount: 5,
+                    itemPadding: const EdgeInsets.symmetric(horizontal: 4),
+                    itemBuilder: (context, _) => const Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                    ),
+                    onRatingUpdate: (rating) {
+                      setState(() {
+                        rating = rating;
+                      });
+                      print(rating);
+                    },
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 25),
