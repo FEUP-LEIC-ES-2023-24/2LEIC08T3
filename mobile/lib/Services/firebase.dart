@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:greenscan/Services/auth.dart';
 import 'package:greenscan/Services/dbUser.dart';
+import 'package:greenscan/Services/store.dart';
 import "product.dart";
 
 class DataBase {
@@ -43,8 +44,8 @@ class DataBase {
       "labels": product.labels,
       "materials": product.materials,
       "name": product.name,
-      "search": product.search
-      //"stores": product.stores TODO
+      "search": product.search,
+      "store": product.stores
     };
 
     await db
@@ -67,5 +68,20 @@ class DataBase {
     );
 
     return await Product.buildProductDB(data);
+  }
+
+  static Future<dynamic> firebaseGetStore(id) async {
+    final storeRef = db.collection("stores").doc(id.toString().trim());
+
+    Map<String, dynamic>? data;
+
+    await storeRef.get().then(
+      (DocumentSnapshot doc) {
+        data = doc.data() as Map<String, dynamic>?;
+      },
+      onError: (e) => print("Error getting document: $e"),
+    );
+
+    return await Store.buildStoreDB(data);
   }
 }
