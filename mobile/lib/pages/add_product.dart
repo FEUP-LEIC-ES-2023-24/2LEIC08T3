@@ -173,7 +173,8 @@ class _AddProductPageState extends State<AddProductPage> {
               country: _countryController.text.trim(),
               search: _nameController.text.trim().toLowerCase(),
               materials: [convertStringToJson(selectedMaterial!)!],
-              labels: labels));
+              labels: labels,
+              stores: []));
       return true;
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

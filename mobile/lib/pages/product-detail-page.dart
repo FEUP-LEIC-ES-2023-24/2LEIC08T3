@@ -7,6 +7,7 @@ import 'package:greenscan/Services/product.dart';
 import 'package:greenscan/components/loading_screen.dart';
 import 'package:greenscan/pages/product_not_found.dart';
 
+import '../Services/store.dart';
 import '../utils/location_services.dart';
 import '../utils/score_calculation.dart';
 
@@ -48,28 +49,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       country: "country",
       search: "search",
       materials: ["materials"],
-      labels: ["labels"]);
-
-  void _showStoreSelection() {
-    fetchStoresForProduct(); // Fetch store data when the button is pressed
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Available Stores'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min, // Keep dialog compact
-          children: [
-            // Show stores based on the fetched data
-            for (var store in stores)
-              ListTile(
-                title: Text(store['name']),
-                subtitle: Text(store['location']),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
+      labels: ["labels"],
+      stores: ["stores"]);
 
   @override
   void initState() {
@@ -79,40 +60,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     ScoreCalculation.loadJson();
   }
 
-  Future<void> fetchStoresForProduct() async {
-    try {
-      DocumentSnapshot snapshot = await FirebaseFirestore.instance
-          .collection('items')
-          .doc(widget.productCode)
-          .get();
-
-      if (snapshot.exists) {
-        var data = snapshot.data() as Map<String, dynamic>;
-        var storesData = data['lojas'] as List<dynamic>; // Assuming 'lojas' is the field containing store data
-
-        // Fetch details of each store
-        for (var storeRef in storesData) {
-          DocumentSnapshot storeSnapshot = await storeRef.get();
-          if (storeSnapshot.exists) {
-            var storeData = storeSnapshot.data() as Map<String, dynamic>;
-            stores.add({
-              'name': storeData['name'],
-              'location': storeData['location'],
-            });
-          }
-        }
-      }
-    } catch (e) {
-      print('Error fetching stores for product: $e');
-    }
-  }
-
   Future<void> fetchProduct() async {
     try {
       var fetchedProduct = await DataBase.firebaseGetProduct(widget.productCode);
+      fetchedProduct as Product;
+      print(fetchedProduct.stores);
+
+      for (var code in fetchedProduct.stores) {
+        var store = await DataBase.firebaseGetStore(code);
+        print(store);
+      }
       if (fetchedProduct == null) {
         Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const ProductNotFoundPage()));
+        MaterialPageRoute(builder: (context) => const ProductNotFoundPage()));
       } else {
         print("failed");
         setState(() {
@@ -127,6 +87,24 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         isLoading = false;
       });
     }
+  }
+
+  void _showStoreSelection(List<Store> stores) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Available Stores'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min, // Keep dialog compact
+          children: [
+            for (var store in stores)
+              ListTile(
+                title: Text(store.name),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   Color getSustainabilityColor(int score) {
@@ -372,13 +350,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       ),
     ];
 
-    ElevatedButton(
-      onPressed: () {
-        _showStoreSelection();
-      },
-      child: const Text('Stores')
-    );
-
     List<Widget> evaluationWidgets = evaluations
         .map((evaluation) => buildEvaluationContainer(evaluation))
         .toList();
@@ -531,7 +502,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: _showStoreSelection,
+              onPressed: () async {
+                List<Store> stores = await product.getProductStores();
+                _showStoreSelection(stores);
+              },
               child: const Text('Escolher Loja'),
             ),
           ],

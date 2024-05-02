@@ -1,5 +1,8 @@
+import 'package:greenscan/Services/store.dart';
 import 'package:greenscan/utils/score_calculation.dart';
 import 'package:greenscan/utils/location_services.dart';
+
+import 'firebase.dart';
 
 class Product {
   // calculate runtime
@@ -17,8 +20,7 @@ class Product {
   final String search;
   final List<String> materials;
   final List<String> labels;
-
-  //final List<Store> stores; TODO
+  final List<String> stores;
 
   Product(
       {required this.sustainableScore,
@@ -32,9 +34,8 @@ class Product {
       required this.country,
       required this.search,
       required this.materials,
+      required this.stores,
       required this.labels});
-
-  //required this.stores TODO
 
   static Future<Product?> buildProductDB(Map<String, dynamic>? data) async {
     if (data == null) return null;
@@ -63,12 +64,10 @@ class Product {
         .where((labels) => labels is String)
         .cast<String>()
         .toList();
-    /*TODO
     final stores_ = (data['stores'] as List<dynamic> ?? [])
-        .where((stores) => labels is String)
+        .where((stores) => stores is String)
         .cast<String>()
         .toList();
-     */
 
     double? distance;
     try {
@@ -103,7 +102,19 @@ class Product {
         country: country_,
         search: data['search'],
         materials: materials_,
-        labels: labels_);
-    //stores = stores_ TODO
-  }
+        labels: labels_, 
+        stores: []);
+
+        }
+
+  Future<List<Store>> getProductStores() async {
+    List<Store> stores = [];
+
+    for (var code in this.stores) {
+      Store? store = await DataBase.firebaseGetStore(code);
+      if (store != null) stores.add(store);
+    }
+
+    return stores;
+  } 
 }
