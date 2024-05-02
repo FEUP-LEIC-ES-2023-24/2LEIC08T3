@@ -1,4 +1,4 @@
-import 'dart:html';
+import 'dart:io' if (dart.library.html) 'dart:html';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
