@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:greenscan/components/loading_screen.dart';
 
 import '../utils/location_services.dart';
@@ -7,10 +9,9 @@ import '../utils/score_calculation.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final String productCode;
+  User user;
 
-  const ProductDetailPage({
-    required this.productCode,
-  });
+  ProductDetailPage({required this.productCode, required this.user});
 
   @override
   _ProductDetailPageState createState() => _ProductDetailPageState();
@@ -30,48 +31,43 @@ class ProductDetails {
   final List<String> materials;
   final String search;
 
-  ProductDetails({
-    required this.sustainableScore,
-    required this.transportScore,
-    required this.materialScore,
-
-    required this.name,
-    required this.brand,
-    required this.imageUrl,
-    required this.category,
-    required this.country,
-    required this.materials,
-    required this.search
-
-  });
+  ProductDetails(
+      {required this.sustainableScore,
+      required this.transportScore,
+      required this.materialScore,
+      required this.name,
+      required this.brand,
+      required this.imageUrl,
+      required this.category,
+      required this.country,
+      required this.materials,
+      required this.search});
 
   factory ProductDetails.fromFirestore(Map<String, dynamic> data) {
     return ProductDetails(
-      sustainableScore: data['sustainableScore'] ?? 0, // if -1, means it hasn't been calculated
-      transportScore: data['transportScore'] ?? 0,
-      materialScore: data['materialScore'] ?? 0,
-
-      name: data['name'] ?? 'Unknown Product',
-      brand: data['brand'] ?? 'Unknown Brand',
-      imageUrl: data['imageUrl'] ?? 'default_image_url',
-      category: data['category'] ?? 'Unknown Category',
-      country: data['country'] ?? 'Unknown Country',
-      materials: List<String>.from(data['materials'] as List<dynamic> ?? []),
-      search: data['search'] ?? '' 
-    );
+        sustainableScore: data['sustainableScore'] ??
+            0, // if -1, means it hasn't been calculated
+        transportScore: data['transportScore'] ?? 0,
+        materialScore: data['materialScore'] ?? 0,
+        name: data['name'] ?? 'Unknown Product',
+        brand: data['brand'] ?? 'Unknown Brand',
+        imageUrl: data['imageUrl'] ?? 'default_image_url',
+        category: data['category'] ?? 'Unknown Category',
+        country: data['country'] ?? 'Unknown Country',
+        materials: List<String>.from(data['materials'] as List<dynamic> ?? []),
+        search: data['search'] ?? '');
   }
 
-  ProductDetails copyWith({
-    int? sustainableScore,
-    int? transportScore,
-    int? materialScore,
-    String? name,
-    String? brand,
-    String? imageUrl,
-    String? category,
-    String? country,
-    List<String>? materials
-  }) {
+  ProductDetails copyWith(
+      {int? sustainableScore,
+      int? transportScore,
+      int? materialScore,
+      String? name,
+      String? brand,
+      String? imageUrl,
+      String? category,
+      String? country,
+      List<String>? materials}) {
     return ProductDetails(
       sustainableScore: sustainableScore ?? this.sustainableScore,
       transportScore: transportScore ?? this.transportScore,
@@ -101,8 +97,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   double progress = 0;
   bool isLoading = true;
   ProductDetails productDetails = ProductDetails(
-      sustainableScore: 0, transportScore: 0, materialScore: 0,
-      name: '', brand: '', imageUrl: '', category: '', country: '', materials: [], search: '');
+      sustainableScore: 0,
+      transportScore: 0,
+      materialScore: 0,
+      name: '',
+      brand: '',
+      imageUrl: '',
+      category: '',
+      country: '',
+      materials: [],
+      search: '');
 
   @override
   void initState() {
@@ -120,24 +124,58 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           .get();
 
       if (snapshot.exists) {
+        // add the scan to the history
+        final docRef =
+            FirebaseFirestore.instance.collection("users").doc(widget.user.uid);
+        final doc = await docRef.get();
+
+        if (!doc.exists) {
+          print("couldn't find the user!");
+        } else {
+          final data = doc.data() as Map<String, dynamic>;
+          final historyData;
+
+          if (data.containsKey('history')) {
+            historyData = data['history'] as List<String>;
+
+            if (!historyData.contains(widget.productCode)) {
+              historyData.add(widget.productCode);
+
+              await docRef.update({
+                'history': historyData,
+              });
+            }
+          } else {
+            historyData = [widget.productCode];
+
+            await docRef.update({
+              'history': historyData,
+            });
+          }
+        }
+
         Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
         productDetails = ProductDetails.fromFirestore(data);
 
         if (productDetails.transportScore == -1) {
-          double? distance = await LocationService.getDistanceToCountry(productDetails.country);
+          double? distance = await LocationService.getDistanceToCountry(
+              productDetails.country);
           if (distance != null) {
-            double calculatedScore = ScoreCalculation.computeTransportScore(distance);
-            productDetails = productDetails.copyWith(transportScore: calculatedScore.truncate());
+            double calculatedScore =
+                ScoreCalculation.computeTransportScore(distance);
+            productDetails = productDetails.copyWith(
+                transportScore: calculatedScore.truncate());
           }
         }
 
-        print(ScoreCalculation.getMaterialRecyclability(productDetails.materials[0]));
+        print(ScoreCalculation.getMaterialRecyclability(
+            productDetails.materials[0]));
         if (productDetails.materialScore == -1) {
-          int score = ScoreCalculation.getMaterialRecyclability(productDetails.materials[0]);
+          int score = ScoreCalculation.getMaterialRecyclability(
+              productDetails.materials[0]);
           productDetails = productDetails.copyWith(materialScore: score);
-
         }
-        
+
         setState(() {
           progress = productDetails.sustainableScore / 100;
           isLoading = false;
@@ -236,9 +274,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               style: const TextStyle(
                   color: Colors.black87,
                   fontSize: 20,
-                  fontWeight: FontWeight.bold
-              )
-          ),
+                  fontWeight: FontWeight.bold)),
           childrenPadding: const EdgeInsets.all(6.0),
           children: evaluation.comments
               .map((comment) => Padding(
@@ -265,29 +301,38 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   @override
   Widget build(BuildContext context) {
     /* TODO: TEMPS TO BE REPLACED BY FIREBASE DATA */
-    EvaluationContainer productInfo = EvaluationContainer(
-        "Info",
-        Practice.info,
-        ['Name : ${productDetails.name}', 'Company: ${productDetails.brand}', 'Category: ${productDetails.category}', 'Code: ${widget.productCode}']);
+    EvaluationContainer productInfo =
+        EvaluationContainer("Info", Practice.info, [
+      'Name : ${productDetails.name}',
+      'Company: ${productDetails.brand}',
+      'Category: ${productDetails.category}',
+      'Code: ${widget.productCode}'
+    ]);
 
     List<EvaluationContainer> evaluations = [
       EvaluationContainer(
         "Transport",
         getPracticeFromScore(productDetails.transportScore),
-        ['Score: ${productDetails.transportScore}', "Country of Origin: ${productDetails.country}", "Delivery is efficient", "Packaging is minimal"],
+        [
+          'Score: ${productDetails.transportScore}',
+          "Country of Origin: ${productDetails.country}",
+          "Delivery is efficient",
+          "Packaging is minimal"
+        ],
       ),
       EvaluationContainer(
         "Materials",
         getPracticeFromScore(productDetails.materialScore),
-        ["Score: ${productDetails.materialScore}", "Material type: ${productDetails.materials}", "Very Recyclable"],
+        [
+          "Score: ${productDetails.materialScore}",
+          "Material type: ${productDetails.materials}",
+          "Very Recyclable"
+        ],
       ),
       EvaluationContainer(
         "Labels",
         Practice.bad,
-        [
-          "Certifications are lacking",
-          "Incomplete product information"
-        ],
+        ["Certifications are lacking", "Incomplete product information"],
       ),
     ];
 
@@ -323,8 +368,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color:
-                      Colors.black87,
+                  color: Colors.black87,
                 ),
               ),
             ),
@@ -354,23 +398,28 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                       TweenAnimationBuilder<double>(
                                         tween: Tween(begin: 0, end: progress),
                                         duration: const Duration(seconds: 2),
-                                        builder: (context, value, child) => SizedBox(
+                                        builder: (context, value, child) =>
+                                            SizedBox(
                                           width: 100,
                                           height: 100,
                                           child: CircularProgressIndicator(
                                             value: value,
                                             strokeWidth: 10,
                                             backgroundColor: Colors.grey[200],
-                                            color: getSustainabilityColor(productDetails.sustainableScore),
+                                            color: getSustainabilityColor(
+                                                productDetails
+                                                    .sustainableScore),
                                           ),
                                         ),
                                       ),
                                       AnimatedSwitcher(
                                         duration: const Duration(seconds: 2),
-                                        transitionBuilder: (Widget child, Animation<double> animation) {
+                                        transitionBuilder: (Widget child,
+                                            Animation<double> animation) {
                                           return FadeTransition(
                                             opacity: animation,
-                                            child: ScaleTransition(scale: animation, child: child),
+                                            child: ScaleTransition(
+                                                scale: animation, child: child),
                                           );
                                         },
                                       ),
@@ -431,8 +480,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children:
-                    evaluationWidgets,
+                children: evaluationWidgets,
               ),
             ),
             const SizedBox(height: 32),

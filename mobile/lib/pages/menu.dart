@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:greenscan/pages/barcode.dart';
+import 'package:greenscan/pages/history.dart';
 import 'package:greenscan/pages/login.dart';
 import 'package:greenscan/pages/map.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 class SideBar extends StatelessWidget {
+  User user;
+  SideBar({required this.user});
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -25,22 +30,14 @@ class SideBar extends StatelessWidget {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.scanner),
-              title: const Text('Scan'),
+              leading: const Icon(Icons.history),
+              title: const Text('History'),
               onTap: () async {
-                String barcodeResult = await FlutterBarcodeScanner.scanBarcode(
-                  '#ff6666', // Cor da barra de cima da tela
-                  'Cancelar', // Texto do botão de cancelar
-                  true, // Mostrar alerta de flash
-                  ScanMode.BARCODE, // Modo de escaneamento (código de barras)
-                );
-                if (barcodeResult != '-1') {
-                  Navigator.push(
+                Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => BarcodeReaderPage()),
+                        builder: (context) => HistoryPage(user: user)),
                   );
-                }  
               },
             ),
             ListTile(
