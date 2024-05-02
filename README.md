@@ -112,7 +112,13 @@ Once again, we were able to fulfill the majority of the user stories and improve
 This time, the issues didn't focus so much on sprint organization, but rather on coordinating different code in Git, especially with conflicts during merging.
 
 ### Project Board At The Beginning of Sprint 2
-
+![image](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/assets/38361094/f531b101-3598-4d45-807a-96149b730daf)
 ### Project Board At The End of Sprint 2
+![image](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/assets/38361094/35ee0080-f2ac-44ac-b727-c7c4f06504e2)
 
 ### User Stories concluded
+- [#15: As an app user, I want to check my product scan history](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/15)
+- [#16: As a app user, I want to see the selling places of a product](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/16)
+- [#18: As an admin, I want to be able to add product information to the database](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/18)
+- [#19: As an app user, I want to get more sustainability details about a product, like labeling and more material information](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/19)
+- [#20: As an app user, I want to get a product not found page in case the product I'm looking for doesn't exist yet](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/20)
