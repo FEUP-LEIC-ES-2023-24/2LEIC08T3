@@ -1,90 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:greenscan/Services/firebase.dart';
+import 'package:greenscan/Services/product.dart';
 import 'package:greenscan/components/loading_screen.dart';
+import 'package:greenscan/pages/product_not_found.dart';
+import 'package:greenscan/pages/google-maps.dart';
 
+import '../Services/store.dart';
 import '../utils/location_services.dart';
 import '../utils/score_calculation.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final String productCode;
+  User user;
 
-  const ProductDetailPage({
-    required this.productCode,
-  });
+  ProductDetailPage({super.key, required this.productCode, required this.user});
 
   @override
   _ProductDetailPageState createState() => _ProductDetailPageState();
-}
-
-class ProductDetails {
-  // SCORES
-  final int sustainableScore;
-  final int transportScore;
-  final int materialScore;
-
-  final String name;
-  final String brand;
-  final String imageUrl;
-  final String category;
-  final String country;
-  final List<String> materials;
-  final String search;
-
-  ProductDetails({
-    required this.sustainableScore,
-    required this.transportScore,
-    required this.materialScore,
-
-    required this.name,
-    required this.brand,
-    required this.imageUrl,
-    required this.category,
-    required this.country,
-    required this.materials,
-    required this.search
-
-  });
-
-  factory ProductDetails.fromFirestore(Map<String, dynamic> data) {
-    return ProductDetails(
-      sustainableScore: data['sustainableScore'] ?? 0, // if -1, means it hasn't been calculated
-      transportScore: data['transportScore'] ?? 0,
-      materialScore: data['materialScore'] ?? 0,
-
-      name: data['name'] ?? 'Unknown Product',
-      brand: data['brand'] ?? 'Unknown Brand',
-      imageUrl: data['imageUrl'] ?? 'default_image_url',
-      category: data['category'] ?? 'Unknown Category',
-      country: data['country'] ?? 'Unknown Country',
-      materials: List<String>.from(data['materials'] as List<dynamic> ?? []),
-      search: data['search'] ?? '' 
-    );
-  }
-
-  ProductDetails copyWith({
-    int? sustainableScore,
-    int? transportScore,
-    int? materialScore,
-    String? name,
-    String? brand,
-    String? imageUrl,
-    String? category,
-    String? country,
-    List<String>? materials
-  }) {
-    return ProductDetails(
-      sustainableScore: sustainableScore ?? this.sustainableScore,
-      transportScore: transportScore ?? this.transportScore,
-      materialScore: materialScore ?? this.materialScore,
-      name: name ?? this.name,
-      brand: brand ?? this.brand,
-      imageUrl: imageUrl ?? this.imageUrl,
-      category: category ?? this.category,
-      country: country ?? this.country,
-      materials: materials ?? this.materials,
-      search: search ?? this.search,
-    );
-  }
 }
 
 enum Practice { good, average, bad, unknown, info }
@@ -100,59 +35,90 @@ class EvaluationContainer {
 class _ProductDetailPageState extends State<ProductDetailPage> {
   double progress = 0;
   bool isLoading = true;
-  ProductDetails productDetails = ProductDetails(
-      sustainableScore: 0, transportScore: 0, materialScore: 0,
-      name: '', brand: '', imageUrl: '', category: '', country: '', materials: [], search: '');
+
+  List<Map<String, dynamic>> stores = [];
+
+  Product product = Product(
+      sustainableScore: 0,
+      transportScore: 0,
+      materialScore: 0,
+      labelScore: 0,
+      name: "name",
+      brand: "brand",
+      imageUrl: "imageUrl",
+      category: "category",
+      country: "country",
+      search: "search",
+      materials: ["materials"],
+      labels: ["labels"],
+      stores: ["stores"]);
 
   @override
   void initState() {
     super.initState();
-    fetchProductDetails();
+    fetchProduct();
     LocationService.requestLocationPermission();
-    ScoreCalculation.loadMaterialScores();
+    ScoreCalculation.loadJson();
   }
 
-  Future<void> fetchProductDetails() async {
+  Future<void> fetchProduct() async {
     try {
-      DocumentSnapshot snapshot = await FirebaseFirestore.instance
-          .collection('items')
-          .doc(widget.productCode)
-          .get();
+      var fetchedProduct = await DataBase.firebaseGetProduct(widget.productCode);
+      fetchedProduct as Product;
+      print(fetchedProduct.stores);
 
-      if (snapshot.exists) {
-        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
-        productDetails = ProductDetails.fromFirestore(data);
-
-        if (productDetails.transportScore == -1) {
-          double? distance = await LocationService.getDistanceToCountry(productDetails.country);
-          if (distance != null) {
-            double calculatedScore = ScoreCalculation.computeTransportScore(distance);
-            productDetails = productDetails.copyWith(transportScore: calculatedScore.truncate());
-          }
-        }
-
-        print(ScoreCalculation.getMaterialRecyclability(productDetails.materials[0]));
-        if (productDetails.materialScore == -1) {
-          int score = ScoreCalculation.getMaterialRecyclability(productDetails.materials[0]);
-          productDetails = productDetails.copyWith(materialScore: score);
-
-        }
-        
-        setState(() {
-          progress = productDetails.sustainableScore / 100;
-          isLoading = false;
-        });
+      for (var code in fetchedProduct.stores) {
+        var store = await DataBase.firebaseGetStore(code);
+        print(store);
+      }
+      if (fetchedProduct == null) {
+        Navigator.push(context,
+        MaterialPageRoute(builder: (context) => const ProductNotFoundPage()));
       } else {
+        print("failed");
         setState(() {
+          product = fetchedProduct;
           isLoading = false;
+          progress = product.sustainableScore / 100;
         });
       }
     } catch (e) {
-      print('Error fetching product details: $e');
+      print('Error fetching product: $e');
       setState(() {
         isLoading = false;
       });
     }
+  }
+
+  void _showStoreSelection(List<Store> stores) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Available Stores'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min, // Keep dialog compact
+          children: [            
+            for (var store in stores)
+              ListTile(
+                leading: IconButton(
+                  icon: Icon(Icons.store),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GoogleMapsPage(
+                          storePosition: LatLng(store.latitude, store.longitude),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                title: Text(store.name),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   Color getSustainabilityColor(int score) {
@@ -236,9 +202,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               style: const TextStyle(
                   color: Colors.black87,
                   fontSize: 20,
-                  fontWeight: FontWeight.bold
-              )
-          ),
+                  fontWeight: FontWeight.bold)),
           childrenPadding: const EdgeInsets.all(6.0),
           children: evaluation.comments
               .map((comment) => Padding(
@@ -262,31 +226,140 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
   }
 
+  Widget buildLabelsContainer(List<String> labels) {
+    Practice getPracticeType(int labelCount) {
+      if (labelCount == 0) return Practice.bad;
+      if (labelCount == 1) return Practice.average;
+      return Practice.good;
+    }
+
+    IconData icon_ = getIconForPractice(getPracticeType(labels.length));
+    Color color_ = getColorForPractice(getPracticeType(labels.length));
+
+    List<Widget> labelEntries = [];
+    if (labels.isEmpty) {
+      labelEntries.add(
+        const ListTile(
+          contentPadding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 10),
+          title: Text(
+            "• No labels found",
+            style: TextStyle(fontSize: 18, color: Colors.black87),
+          ),
+        ),
+      );
+    } else {
+      for (int i = 0; i < labels.length; i++) {
+        String label = labels[i];
+        String description = ScoreCalculation.getLabelDescription(label);
+        labelEntries.add(
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Stack(
+                        clipBehavior: Clip.none,
+                        alignment: Alignment.topCenter,
+                        children: [
+                          Image.asset(
+                            'assets/labels/${label.toLowerCase()}.png',
+                            width: 90,
+                            height: 90,
+                          ),
+                          const Positioned(
+                            top: -35,
+                            child: Icon(Icons.check_circle, color: Colors.green, size: 24),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 15),
+                      Expanded(
+                        child: Text(
+                          description,
+                          style: const TextStyle(
+                            color: Colors.black87,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (i < labels.length - 1)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Divider(color: Colors.grey),
+                  ),
+              ],
+            )
+        );
+      }
+    }
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+      margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        color: color_.withOpacity(0.25),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          initiallyExpanded: false,
+          leading: Icon(
+            icon_,
+            color: color_,
+            size: 28,
+          ),
+          title: const Text(
+            "Labels",
+            style: TextStyle(
+                color: Colors.black87,
+                fontSize: 20,
+                fontWeight: FontWeight.bold),
+          ),
+          children: labelEntries,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    /* TODO: TEMPS TO BE REPLACED BY FIREBASE DATA */
-    EvaluationContainer productInfo = EvaluationContainer(
-        "Info",
-        Practice.info,
-        ['Name : ${productDetails.name}', 'Company: ${productDetails.brand}', 'Category: ${productDetails.category}', 'Code: ${widget.productCode}']);
+    String material =
+        product.materials.isNotEmpty ? product.materials[0] : 'N/A';
+    EvaluationContainer productInfo =
+        EvaluationContainer("Info", Practice.info, [
+      'Name : ${product.name}',
+      'Company: ${product.brand}',
+      'Category: ${product.category}',
+      'Code: ${widget.productCode}'
+    ]);
 
     List<EvaluationContainer> evaluations = [
       EvaluationContainer(
         "Transport",
-        getPracticeFromScore(productDetails.transportScore),
-        ['Score: ${productDetails.transportScore}', "Country of Origin: ${productDetails.country}", "Delivery is efficient", "Packaging is minimal"],
+
+        getPracticeFromScore(product.transportScore),
+        [
+          'Score: ${product.transportScore}',
+          "Country of Origin: ${product.country}",
+
+          "Delivery is efficient",
+          "Packaging is minimal"
+        ],
       ),
       EvaluationContainer(
         "Materials",
-        getPracticeFromScore(productDetails.materialScore),
-        ["Score: ${productDetails.materialScore}", "Material type: ${productDetails.materials}", "Very Recyclable"],
-      ),
-      EvaluationContainer(
-        "Labels",
-        Practice.bad,
+        getPracticeFromScore(product.materialScore),
         [
-          "Certifications are lacking",
-          "Incomplete product information"
+          "Score: ${product.materialScore}",
+          "Material type: $material",
+          ...ScoreCalculation.getMaterialComments(material)
         ],
       ),
     ];
@@ -302,7 +375,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(productDetails.name),
+        title: Text(product.name),
         backgroundColor: Colors.green,
         elevation: 0,
       ),
@@ -311,7 +384,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Image.network(
-              productDetails.imageUrl,
+              product.imageUrl,
               width: double.infinity,
               height: 200,
               fit: BoxFit.cover,
@@ -319,12 +392,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                productDetails.name,
+                product.name,
                 style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color:
-                      Colors.black87,
+                  color: Colors.black87,
                 ),
               ),
             ),
@@ -354,23 +426,28 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                       TweenAnimationBuilder<double>(
                                         tween: Tween(begin: 0, end: progress),
                                         duration: const Duration(seconds: 2),
-                                        builder: (context, value, child) => SizedBox(
+                                        builder: (context, value, child) =>
+                                            SizedBox(
                                           width: 100,
                                           height: 100,
                                           child: CircularProgressIndicator(
                                             value: value,
                                             strokeWidth: 10,
                                             backgroundColor: Colors.grey[200],
-                                            color: getSustainabilityColor(productDetails.sustainableScore),
+                                            color: getSustainabilityColor(
+                                                product.sustainableScore),
+
                                           ),
                                         ),
                                       ),
                                       AnimatedSwitcher(
                                         duration: const Duration(seconds: 2),
-                                        transitionBuilder: (Widget child, Animation<double> animation) {
+                                        transitionBuilder: (Widget child,
+                                            Animation<double> animation) {
                                           return FadeTransition(
                                             opacity: animation,
-                                            child: ScaleTransition(scale: animation, child: child),
+                                            child: ScaleTransition(
+                                                scale: animation, child: child),
                                           );
                                         },
                                       ),
@@ -381,7 +458,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             ),
                           ),
                           Text(
-                            '${productDetails.sustainableScore.toInt()}%',
+                            '${product.sustainableScore.toInt()}%',
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -397,7 +474,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       child: Align(
                         alignment: Alignment.center,
                         child: Text(
-                          getImpactString(productDetails.sustainableScore),
+                          getImpactString(product.sustainableScore),
                           style: const TextStyle(
                             color: Colors.black87,
                             fontWeight: FontWeight.bold,
@@ -431,11 +508,37 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children:
-                    evaluationWidgets,
+                children: [
+                  ...evaluationWidgets,
+                  buildLabelsContainer(product.labels)
+                ],
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 25),
+            Center(
+              child: SizedBox(
+                width: 220,
+                height: 50,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      List<Store> stores = await product.getProductStores();
+                      _showStoreSelection(stores);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      ),
+                    child: const Center(
+                      child: Text(
+                        'Available Stores',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),  
+              ),
+            ),
           ],
         ),
       ),

@@ -1,44 +1,130 @@
 {
   "paper": {
-    "recyclability": 100
+    "recyclability": 100,
+    "biodegradability": 90,
+    "renewability": 85,
+    "reusability": 50,
+    "comments": [
+      "Highly recyclable and biodegradable.",
+      "Made from renewable resources but quality may degrade with reuse."
+    ]
   },
   "cardboard": {
-    "recyclability": 100
+    "recyclability": 100,
+    "biodegradability": 85,
+    "renewability": 80,
+    "reusability": 50,
+    "comments": [
+      "Excellent recyclability and good biodegradability.",
+      "Renewable but less durable upon multiple uses."
+    ]
   },
   "glass": {
-    "recyclability": 80
+    "recyclability": 80,
+    "biodegradability": 0,
+    "renewability": 20,
+    "reusability": 95,
+    "comments": [
+      "Non-biodegradable but highly reusable without quality loss.",
+      "Made from sand, a plentiful resource but energy-intensive to melt."
+    ]
   },
   "aluminum": {
-    "recyclability": 75
+    "recyclability": 75,
+    "biodegradability": 0,
+    "renewability": 40,
+    "reusability": 90,
+    "comments": [
+      "Highly recyclable and reusable with minimal quality loss.",
+      "Production is energy-intensive",
+      "Made from non-renewable materials, despite abundant."
+    ]
   },
   "steel": {
-    "recyclability": 75
+    "recyclability": 75,
+    "biodegradability": 0,
+    "renewability": 25,
+    "reusability": 90,
+    "comments": [
+      "Extremely durable and recyclable.",
+      "Non-renewable iron ore source"
+    ]
   },
-  "plastic-pet": {
-    "recyclability": 75
+  "plastic_pet": {
+    "recyclability": 75,
+    "biodegradability": 0,
+    "renewability": 15,
+    "reusability": 60,
+    "comments": [
+      "Commonly recycled but derived from non-renewable petroleum.",
+      "Recyclable but often downcycled.",
+      "Can be reused but quality may degrade"
+    ]
   },
-  "plastic-hdpe": {
-    "recyclability": 65
+  "plastic_hdpe": {
+    "recyclability": 65,
+    "biodegradability": 0,
+    "renewability": 15,
+    "reusability": 50,
+    "comments": [
+      "Durable and moderately recyclable."
+    ]
   },
-  "plastic-pvc": {
-    "recyclability": 25
+  "plastic_pvc": {
+    "recyclability": 25,
+    "biodegradability": 0,
+    "renewability": 10,
+    "reusability": 20,
+    "comments": [
+      "Challenging to recycle and contains harmful additives.",
+      "Packaging raises health concerns."
+    ]
   },
-  "plastic-ldpe": {
-    "recyclability": 20
+  "plastic_ldpe": {
+    "recyclability": 20,
+    "biodegradability": 0,
+    "renewability": 15,
+    "reusability": 35,
+    "comments": [
+      "Recyclable but less commonly accepted"
+    ]
   },
-  "plastic-pp": {
-    "recyclability": 25
+  "plastic_pp": {
+    "recyclability": 25,
+    "biodegradability": 0,
+    "renewability": 20,
+    "reusability": 40,
+    "comments": [
+      "Increasingly being recycled."
+    ]
   },
-  "plastic-ps": {
-    "recyclability": 10
+  "plastic_ps": {
+    "recyclability": 10,
+    "biodegradability": 0,
+    "renewability": 5,
+    "reusability": 10,
+    "comments": [
+      "Difficult to recycle and rarely accepted by programs, due to economic unviability"
+    ]
   },
   "mixed": {
-    "recyclability": 10
+    "recyclability": 10,
+    "biodegradability": 10,
+    "renewability": 5,
+    "reusability": 10,
+    "comments": [
+      "Complex mixtures make recycling difficult.",
+      "Often ends up in landfill due to contamination between materials."
+    ]
   },
   "bioplastics": {
-    "recyclability": 50
-  },
-  "biodegradable": {
-    "recyclability": 100
+    "recyclability": 50,
+    "biodegradability": 80,
+    "renewability": 90,
+    "reusability": 30,
+    "comments": [
+      "Made from renewable resources and often biodegradable.",
+      "Not universally recyclable, varying significantly by type."
+    ]
   }
 }

@@ -6,7 +6,7 @@ class CustomLoadingScreen extends StatelessWidget {
 
   const CustomLoadingScreen({
     Key? key,
-    this.loadingMessage = "Aguarde...",
+    this.loadingMessage = "Calculating...",
   }) : super(key: key);
 
   @override
