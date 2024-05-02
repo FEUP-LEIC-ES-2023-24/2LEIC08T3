@@ -1,11 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:greenscan/Services/firebase.dart';
 import 'package:greenscan/components/loading_screen.dart';
+import 'package:greenscan/pages/product_not_found.dart';
 
 import '../utils/location_services.dart';
 import '../utils/score_calculation.dart';
-
-import 'package:greenscan/Services/product.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final String productCode;
@@ -16,6 +15,87 @@ class ProductDetailPage extends StatefulWidget {
 
   @override
   _ProductDetailPageState createState() => _ProductDetailPageState();
+}
+
+class ProductDetails {
+  // SCORES
+  final int sustainableScore;
+  final int transportScore;
+  final int materialScore;
+  final int labelScore;
+
+  final String name;
+  final String brand;
+  final String imageUrl;
+  final String category;
+  final String country;
+  final List<String> materials;
+  final List<String> labels;
+  final String search;
+
+  ProductDetails({
+    required this.sustainableScore,
+    required this.transportScore,
+    required this.materialScore,
+    required this.labelScore,
+
+    required this.name,
+    required this.brand,
+    required this.imageUrl,
+    required this.category,
+    required this.country,
+    required this.materials,
+    required this.labels,
+    required this.search
+
+  });
+
+  factory ProductDetails.fromFirestore(Map<String, dynamic> data) {
+    return ProductDetails(
+        sustainableScore: data['sustainableScore'] ?? 0, // if -1, means it hasn't been calculated
+        transportScore: data['transportScore'] ?? 0,
+        materialScore: data['materialScore'] ?? 0,
+        labelScore: data['labelScore'] ?? 0,
+
+        name: data['name'] ?? 'Unknown Product',
+        brand: data['brand'] ?? 'Unknown Brand',
+        imageUrl: data['imageUrl'] ?? 'default_image_url',
+        category: data['category'] ?? 'Unknown Category',
+        country: data['country'] ?? 'Unknown Country',
+        materials: List<String>.from(data['materials'] as List<dynamic> ?? []),
+        labels: List<String>.from(data['labels'] as List<dynamic> ?? []),
+        search: data['search'] ?? ''
+    );
+  }
+
+  ProductDetails copyWith({
+    int? sustainableScore,
+    int? transportScore,
+    int? materialScore,
+    int? labelScore,
+    String? name,
+    String? brand,
+    String? imageUrl,
+    String? category,
+    String? country,
+    List<String>? materials,
+    List<String>? labels
+  }) {
+    return ProductDetails(
+      sustainableScore: sustainableScore ?? this.sustainableScore,
+      transportScore: transportScore ?? this.transportScore,
+      materialScore: materialScore ?? this.materialScore,
+      labelScore: labelScore ?? this.labelScore,
+      name: name ?? this.name,
+      brand: brand ?? this.brand,
+      imageUrl: imageUrl ?? this.imageUrl,
+      category: category ?? this.category,
+      country: country ?? this.country,
+      materials: materials ?? this.materials,
+      labels: labels ?? this.labels,
+      search: search ?? this.search,
+    );
+  }
 }
 
 enum Practice { good, average, bad, unknown, info }
@@ -31,37 +111,68 @@ class EvaluationContainer {
 class _ProductDetailPageState extends State<ProductDetailPage> {
   double progress = 0;
   bool isLoading = true;
-  Product product = Product(
-      sustainableScore: 0,
-      transportScore: 0,
-      materialScore: 0,
-      name: "name",
-      brand: "brand",
-      imageUrl: "imageUrl",
-      category: "category",
-      country: "country",
-      search: "search",
-      materials: ["materials"],
-      labels: ["labels"]);
+  ProductDetails productDetails = ProductDetails(
+      sustainableScore: 0, transportScore: 0, materialScore: 0, labelScore: 0,
+      name: '', brand: '', imageUrl: '', category: '', country: '',
+      materials: [], labels: [], search: '');
 
   @override
   void initState() {
     super.initState();
+    fetchProductDetails();
     LocationService.requestLocationPermission();
-    ScoreCalculation.loadMaterialScores();
-    fetchProduct();
+    ScoreCalculation.loadJson();
   }
 
-  Future<void> fetchProduct() async {
+  Future<void> fetchProductDetails() async {
     try {
-      var fetchedProduct =
-          await DataBase.firebaseGetProduct(widget.productCode);
-      setState(() {
-        product = fetchedProduct;
-        isLoading = false;
-      });
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection('items')
+          .doc(widget.productCode)
+          .get();
+
+      if (snapshot.exists) {
+        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+        productDetails = ProductDetails.fromFirestore(data);
+
+        if (productDetails.transportScore == -1) {
+          double? distance = await LocationService.getDistanceToCountry(productDetails.country);
+          if (distance != null) {
+            double calculatedScore = ScoreCalculation.getTransportScore(distance);
+            productDetails = productDetails.copyWith(transportScore: calculatedScore.truncate());
+          }
+        }
+
+        if (productDetails.materialScore == -1) {
+          int score = ScoreCalculation.getMaterialScore(productDetails.materials[0]);
+          productDetails = productDetails.copyWith(materialScore: score);
+        }
+
+        if (productDetails.labelScore == -1) {
+          int score = ScoreCalculation.getLabelScore(productDetails.labels.length);
+          productDetails = productDetails.copyWith(labelScore: score);
+        }
+
+        if (productDetails.sustainableScore == -1) {
+          int score = ScoreCalculation.getSustainabilityScore(
+              productDetails.transportScore, productDetails.materialScore,
+              productDetails.labelScore);
+          print("SCORESCORE ${score}");
+          productDetails = productDetails.copyWith(sustainableScore: score);
+        }
+
+        setState(() {
+          progress = productDetails.sustainableScore / 100;
+          isLoading = false;
+        });
+      } else {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => ProductNotFoundPage()));
+        setState(() {
+          isLoading = false;
+        });
+      }
     } catch (e) {
-      print('Error fetching product: $e');
+      print('Error fetching product details: $e');
       setState(() {
         isLoading = false;
       });
@@ -149,65 +260,127 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               style: const TextStyle(
                   color: Colors.black87,
                   fontSize: 20,
-                  fontWeight: FontWeight.bold)),
+                  fontWeight: FontWeight.bold
+              )
+          ),
           childrenPadding: const EdgeInsets.all(6.0),
           children: evaluation.comments
               .map((comment) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10.0),
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 20.0),
-                        Expanded(
-                          child: Text(
-                            "• $comment",
-                            style: const TextStyle(
-                                color: Colors.black87, fontSize: 18),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ))
+            padding: const EdgeInsets.only(bottom: 10.0),
+            child: Row(
+              children: [
+                const SizedBox(width: 20.0),
+                Expanded(
+                  child: Text(
+                    "• $comment",
+                    style: const TextStyle(
+                        color: Colors.black87, fontSize: 18),
+                  ),
+                ),
+              ],
+            ),
+          ))
               .toList(),
         ),
       ),
     );
   }
 
+  Widget buildLabelsContainer(List<String> labels) {
+    Practice getPracticeType(int labelCount) {
+      if (labelCount == 0) return Practice.bad;
+      if (labelCount == 1) return Practice.average;
+      return Practice.good;
+    }
+    IconData icon_ = getIconForPractice(getPracticeType(labels.length));
+    Color color_ = getColorForPractice(getPracticeType(labels.length));
+
+    List<Widget> labelEntries = labels.map((label) {
+      String description = ScoreCalculation.getLabelDescription(label);
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 15.0),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/labels/${label.toLowerCase()}.png',
+                  width: 100,
+                  height: 100,
+                ),
+                const SizedBox(width: 15),
+                const Icon(Icons.check_circle, color: Colors.green, size: 28),
+              ],
+            ),
+            SizedBox(height: 15),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                description,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }).toList();
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+      margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        color: color_.withOpacity(0.25),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          initiallyExpanded: false,
+          leading: Icon(
+            icon_,
+            color: color_,
+            size: 28,
+          ),
+          title: const Text(
+            "Labels",
+            style: TextStyle(
+                color: Colors.black87,
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+            ),
+          ),
+          children: labelEntries,
+        ),
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    /* TODO: TEMPS TO BE REPLACED BY FIREBASE DATA */
-    EvaluationContainer productInfo =
-        EvaluationContainer("Info", Practice.info, [
-      'Name : ${product.name}',
-      'Company: ${product.brand}',
-      'Category: ${product.category}',
-      'Code: ${widget.productCode}'
-    ]);
+    String material = productDetails.materials.isNotEmpty ? productDetails.materials[0] : 'N/A';
+    EvaluationContainer productInfo = EvaluationContainer(
+        "Info",
+        Practice.info,
+        ['Name : ${productDetails.name}', 'Company: ${productDetails.brand}', 'Category: ${productDetails.category}', 'Code: ${widget.productCode}']);
 
     List<EvaluationContainer> evaluations = [
       EvaluationContainer(
         "Transport",
-        getPracticeFromScore(product.transportScore),
-        [
-          'Score: ${product.transportScore}',
-          "Country of Origin: ${product.country}",
-          "Delivery is efficient",
-          "Packaging is minimal"
-        ],
+        getPracticeFromScore(productDetails.transportScore),
+        ['Score: ${productDetails.transportScore}', "Country of Origin: ${productDetails.country}", "Delivery is efficient", "Packaging is minimal"],
       ),
       EvaluationContainer(
         "Materials",
-        getPracticeFromScore(product.materialScore),
-        [
-          "Score: ${product.materialScore}",
-          "Material type: ${product.materials}",
-          "Very Recyclable"
-        ],
-      ),
-      EvaluationContainer(
-        "Labels",
-        Practice.bad,
-        ["Certifications are lacking", "Incomplete product information"],
+        getPracticeFromScore(productDetails.materialScore),
+        ["Score: ${productDetails.materialScore}", "Material type: $material", ...ScoreCalculation.getMaterialComments(material)],
       ),
     ];
 
@@ -222,7 +395,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(product.name),
+        title: Text(productDetails.name),
         backgroundColor: Colors.green,
         elevation: 0,
       ),
@@ -231,7 +404,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Image.network(
-              product.imageUrl,
+              productDetails.imageUrl,
               width: double.infinity,
               height: 200,
               fit: BoxFit.cover,
@@ -239,17 +412,18 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                product.name,
+                productDetails.name,
                 style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color:
+                  Colors.black87,
                 ),
               ),
             ),
             Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
+              const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
               child: IntrinsicHeight(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -273,27 +447,23 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                       TweenAnimationBuilder<double>(
                                         tween: Tween(begin: 0, end: progress),
                                         duration: const Duration(seconds: 2),
-                                        builder: (context, value, child) =>
-                                            SizedBox(
+                                        builder: (context, value, child) => SizedBox(
                                           width: 100,
                                           height: 100,
                                           child: CircularProgressIndicator(
                                             value: value,
                                             strokeWidth: 10,
                                             backgroundColor: Colors.grey[200],
-                                            color: getSustainabilityColor(
-                                                product.sustainableScore),
+                                            color: getSustainabilityColor(productDetails.sustainableScore),
                                           ),
                                         ),
                                       ),
                                       AnimatedSwitcher(
                                         duration: const Duration(seconds: 2),
-                                        transitionBuilder: (Widget child,
-                                            Animation<double> animation) {
+                                        transitionBuilder: (Widget child, Animation<double> animation) {
                                           return FadeTransition(
                                             opacity: animation,
-                                            child: ScaleTransition(
-                                                scale: animation, child: child),
+                                            child: ScaleTransition(scale: animation, child: child),
                                           );
                                         },
                                       ),
@@ -304,7 +474,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             ),
                           ),
                           Text(
-                            '${product.sustainableScore.toInt()}%',
+                            '${productDetails.sustainableScore.toInt()}%',
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -320,7 +490,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       child: Align(
                         alignment: Alignment.center,
                         child: Text(
-                          getImpactString(product.sustainableScore),
+                          getImpactString(productDetails.sustainableScore),
                           style: const TextStyle(
                             color: Colors.black87,
                             fontWeight: FontWeight.bold,
@@ -354,7 +524,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: evaluationWidgets,
+                children: [
+                  ...evaluationWidgets, buildLabelsContainer(productDetails.labels)],
               ),
             ),
             const SizedBox(height: 32),

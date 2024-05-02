@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:greenscan/pages/add_product.dart';
 import 'package:greenscan/pages/barcode.dart';
 import 'package:greenscan/pages/login.dart';
 import 'package:greenscan/pages/map.dart';
@@ -45,9 +46,13 @@ class SideBar extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.inventory),
-              title: const Text('Inventory'),
-              onTap: () {
-
+              title: const Text('Add Product'),
+              onTap: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const AddProductPage()),
+                );
               },
             ),
             ListTile(

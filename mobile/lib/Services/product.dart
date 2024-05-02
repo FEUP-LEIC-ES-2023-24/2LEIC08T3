@@ -72,7 +72,7 @@ class Product {
         print("invalid distance");
         return null;
       }
-      transportScore_ = ScoreCalculation.computeTransportScore(distance).toInt();
+      //transportScore_ = ScoreCalculation.computeTransportScore(distance).toInt();
     } catch (error) {
       print("Error calculating transport score: $error");
       return null;
