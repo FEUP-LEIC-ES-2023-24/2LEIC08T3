@@ -91,16 +91,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   Future<void> fetchProduct() async {
     try {
-      var fetchedProduct =
-          await DataBase.firebaseGetProduct(widget.productCode);
+      var fetchedProduct = await DataBase.firebaseGetProduct(widget.productCode);
       if (fetchedProduct == null) {
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => ProductNotFoundPage()));
+      } else {
+        setState(() {
+          product = fetchedProduct;
+          isLoading = false;
+          progress = product.sustainableScore / 100;
+        });
       }
-      setState(() {
-        product = fetchedProduct;
-        isLoading = false;
-      });
     } catch (e) {
       print('Error fetching product: $e');
       setState(() {
