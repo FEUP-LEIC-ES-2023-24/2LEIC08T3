@@ -65,6 +65,41 @@ class DataBase {
       },
       onError: (e) => print("Error getting document: $e"),
     );
+    
+    // add the scan to the history
+    if (AuthService.user == null) {
+      print("user is null");
+    } else {
+      final docRef = FirebaseFirestore.instance
+          .collection("users")
+          .doc(AuthService.user!.uid);
+      final doc = await docRef.get();
+
+      if (!doc.exists) {
+        print("couldn't find the user!");
+      } else {
+        final data = doc.data() as Map<String, dynamic>;
+        final historyData;
+
+        if (data.containsKey('history')) {
+          historyData = data['history'] as List<dynamic>;
+
+          if (!historyData.contains(id)) {
+            historyData.add(id);
+
+            await docRef.update({
+              'history': historyData,
+            });
+          }
+        } else {
+          historyData = [id];
+
+          await docRef.update({
+            'history': historyData,
+          });
+        }
+      }
+    }
 
     return await Product.buildProductDB(data);
   }

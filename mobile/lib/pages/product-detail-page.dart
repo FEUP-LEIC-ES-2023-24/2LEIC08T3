@@ -47,40 +47,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       materials: ["materials"],
       labels: ["labels"]);
 
-  /*
-  if (snapshot.exists) {
-  // add the scan to the history
-  final docRef =
-  FirebaseFirestore.instance.collection("users").doc(widget.user.uid);
-  final doc = await docRef.get();
-
-  if (!doc.exists) {
-  print("couldn't find the user!");
-  } else {
-  final data = doc.data() as Map<String, dynamic>;
-  final historyData;
-
-  if (data.containsKey('history')) {
-  historyData = data['history'] as List<String>;
-
-  if (!historyData.contains(widget.productCode)) {
-  historyData.add(widget.productCode);
-
-  await docRef.update({
-  'history': historyData,
-  });
-  }
-  } else {
-  historyData = [widget.productCode];
-
-  await docRef.update({
-  'history': historyData,
-  });
-  }
-  }
-
-   */
-
   @override
   void initState() {
     super.initState();
@@ -96,6 +62,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const ProductNotFoundPage()));
       } else {
+        print("failed");
         setState(() {
           product = fetchedProduct;
           isLoading = false;

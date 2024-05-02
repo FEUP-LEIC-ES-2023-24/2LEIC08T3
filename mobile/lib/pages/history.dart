@@ -6,7 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 class HistoryPage extends StatefulWidget {
   User user;
 
-  HistoryPage({super.key, 
+  HistoryPage({
+    super.key,
     required this.user,
   });
 
@@ -42,8 +43,8 @@ class _HistoryPageState extends State<HistoryPage> {
         } else {
           return Scaffold(
             appBar: AppBar(
-              backgroundColor:
-                  const Color(0xff4b986c), // Set the background color of the AppBar
+              backgroundColor: const Color(
+                  0xff4b986c), // Set the background color of the AppBar
               title: const Text(
                 'History',
                 style: TextStyle(
@@ -68,8 +69,9 @@ class _HistoryPageState extends State<HistoryPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => ProductDetailPage(
-                              productCode: snapshot.data![index].barcode,
-                              user: widget.user,),
+                            productCode: snapshot.data![index].barcode,
+                            user: widget.user,
+                          ),
                         ),
                       );
                     },
