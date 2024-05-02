@@ -10,12 +10,10 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
 
+  final _userNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _secondPasswordController = TextEditingController();
-
-  final AuthService _authService = AuthService();
-  final CredService _credService = CredService();
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +42,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               SizedBox(height: 20.0),
               TextField(
+                controller: _userNameController,
                 decoration: InputDecoration(
                   hintText: 'Full Name',
                   border: OutlineInputBorder(), // Add border to text fields
@@ -80,12 +79,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 width: double.infinity, // Make button full width
                 child: ElevatedButton(
                   onPressed: () async {
-                    dynamic credential = await _authService.registerEmail(
+                    await AuthService.registerEmail(
+                        _userNameController.text.trim(),
                         _emailController.text.trim(),
                         _passwordController.text,
-                        _secondPasswordController.text
+                        _secondPasswordController.text,
+                        context
                     );
-                    _credService.register(credential, context);
                   },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all<Color>(Color(0xff4b986c)), // Match app bar color

@@ -1,0 +1,20 @@
+{
+  "carbon_trust": {
+    "description": "Identifies companies that are reducing their greenhouse gas emissions. The product's carbon footprint has been measured to internationally recognised standards."
+  },
+  "eu_organic": {
+    "description": "Guarantees that the product meets strict organic farming standards within the EU, including no synthetic pesticides and fertilizers, animal welfare, and no GMOs."
+  },
+  "fairtrade": {
+    "description": "Ensures fair trading conditions and prices for farmers and workers in developing countries, promoting better environmental and social standards."
+  },
+  "fsc": {
+    "description": "The Forest Stewardship Council (FSC) promotes environmentally appropriate, socially beneficial, and economically viable management of the world's forests. Can either be a Chain of Custody certification or a Forest Management Certification"
+  },
+  "green_dot": {
+    "description": "Indicates that the manufacturer contributes to the cost of recovery and recycling of packaging in Europe."
+  },
+  "rainforest_alliance": {
+    "description": "Certifies products and ingredients that meet standards designed to support environmental sustainability, worker rights, and local communities."
+  }
+}

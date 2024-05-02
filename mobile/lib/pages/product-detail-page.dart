@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:greenscan/components/loading_screen.dart';
+import 'package:greenscan/pages/product_not_found.dart';
 
 import '../utils/location_services.dart';
 import '../utils/score_calculation.dart';
@@ -22,6 +23,7 @@ class ProductDetails {
   final int sustainableScore;
   final int transportScore;
   final int materialScore;
+  final int labelScore;
 
   final String name;
   final String brand;
@@ -29,55 +31,68 @@ class ProductDetails {
   final String category;
   final String country;
   final List<String> materials;
+  final List<String> labels;
   final String search;
+  
+  ProductDetails({
+    required this.sustainableScore,
+    required this.transportScore,
+    required this.materialScore,
+    required this.labelScore,
 
-  ProductDetails(
-      {required this.sustainableScore,
-      required this.transportScore,
-      required this.materialScore,
-      required this.name,
-      required this.brand,
-      required this.imageUrl,
-      required this.category,
-      required this.country,
-      required this.materials,
-      required this.search});
+    required this.name,
+    required this.brand,
+    required this.imageUrl,
+    required this.category,
+    required this.country,
+    required this.materials,
+    required this.labels,
+    required this.search
+
+  });
 
   factory ProductDetails.fromFirestore(Map<String, dynamic> data) {
     return ProductDetails(
-        sustainableScore: data['sustainableScore'] ??
-            0, // if -1, means it hasn't been calculated
+        sustainableScore: data['sustainableScore'] ?? 0, // if -1, means it hasn't been calculated
         transportScore: data['transportScore'] ?? 0,
         materialScore: data['materialScore'] ?? 0,
+        labelScore: data['labelScore'] ?? 0,
         name: data['name'] ?? 'Unknown Product',
         brand: data['brand'] ?? 'Unknown Brand',
         imageUrl: data['imageUrl'] ?? 'default_image_url',
         category: data['category'] ?? 'Unknown Category',
         country: data['country'] ?? 'Unknown Country',
         materials: List<String>.from(data['materials'] as List<dynamic> ?? []),
-        search: data['search'] ?? '');
+        labels: List<String>.from(data['labels'] as List<dynamic> ?? []),
+        search: data['search'] ?? ''
+    );
   }
 
-  ProductDetails copyWith(
-      {int? sustainableScore,
-      int? transportScore,
-      int? materialScore,
-      String? name,
-      String? brand,
-      String? imageUrl,
-      String? category,
-      String? country,
-      List<String>? materials}) {
+  ProductDetails copyWith({
+    int? sustainableScore,
+    int? transportScore,
+    int? materialScore,
+    int? labelScore,
+    String? name,
+    String? brand,
+    String? imageUrl,
+    String? category,
+    String? country,
+    List<String>? materials,
+    List<String>? labels
+  }) {
     return ProductDetails(
       sustainableScore: sustainableScore ?? this.sustainableScore,
       transportScore: transportScore ?? this.transportScore,
       materialScore: materialScore ?? this.materialScore,
+      labelScore: labelScore ?? this.labelScore,
       name: name ?? this.name,
       brand: brand ?? this.brand,
       imageUrl: imageUrl ?? this.imageUrl,
       category: category ?? this.category,
       country: country ?? this.country,
       materials: materials ?? this.materials,
+      labels: labels ?? this.labels,
       search: search ?? this.search,
     );
   }
@@ -97,23 +112,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   double progress = 0;
   bool isLoading = true;
   ProductDetails productDetails = ProductDetails(
-      sustainableScore: 0,
-      transportScore: 0,
-      materialScore: 0,
-      name: '',
-      brand: '',
-      imageUrl: '',
-      category: '',
-      country: '',
-      materials: [],
-      search: '');
+      sustainableScore: 0, transportScore: 0, materialScore: 0, labelScore: 0,
+      name: '', brand: '', imageUrl: '', category: '', country: '',
+      materials: [], labels: [], search: '');
 
   @override
   void initState() {
     super.initState();
     fetchProductDetails();
     LocationService.requestLocationPermission();
-    ScoreCalculation.loadMaterialScores();
+    ScoreCalculation.loadJson();
   }
 
   Future<void> fetchProductDetails() async {
@@ -161,19 +169,27 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           double? distance = await LocationService.getDistanceToCountry(
               productDetails.country);
           if (distance != null) {
-            double calculatedScore =
-                ScoreCalculation.computeTransportScore(distance);
-            productDetails = productDetails.copyWith(
-                transportScore: calculatedScore.truncate());
+            double calculatedScore = ScoreCalculation.getTransportScore(distance);
+            productDetails = productDetails.copyWith(transportScore: calculatedScore.truncate());
           }
         }
 
-        print(ScoreCalculation.getMaterialRecyclability(
-            productDetails.materials[0]));
         if (productDetails.materialScore == -1) {
-          int score = ScoreCalculation.getMaterialRecyclability(
-              productDetails.materials[0]);
+          int score = ScoreCalculation.getMaterialScore(productDetails.materials[0]);
           productDetails = productDetails.copyWith(materialScore: score);
+        }
+
+        if (productDetails.labelScore == -1) {
+          int score = ScoreCalculation.getLabelScore(productDetails.labels.length);
+          productDetails = productDetails.copyWith(labelScore: score);
+        }
+
+        if (productDetails.sustainableScore == -1) {
+          int score = ScoreCalculation.getSustainabilityScore(
+              productDetails.transportScore, productDetails.materialScore,
+              productDetails.labelScore);
+          print("SCORESCORE ${score}");
+          productDetails = productDetails.copyWith(sustainableScore: score);
         }
 
         setState(() {
@@ -181,6 +197,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           isLoading = false;
         });
       } else {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => ProductNotFoundPage()));
         setState(() {
           isLoading = false;
         });
@@ -278,36 +295,110 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           childrenPadding: const EdgeInsets.all(6.0),
           children: evaluation.comments
               .map((comment) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10.0),
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 20.0),
-                        Expanded(
-                          child: Text(
-                            "• $comment",
-                            style: const TextStyle(
-                                color: Colors.black87, fontSize: 18),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ))
+            padding: const EdgeInsets.only(bottom: 10.0),
+            child: Row(
+              children: [
+                const SizedBox(width: 20.0),
+                Expanded(
+                  child: Text(
+                    "• $comment",
+                    style: const TextStyle(
+                        color: Colors.black87, fontSize: 18),
+                  ),
+                ),
+              ],
+            ),
+          ))
               .toList(),
         ),
       ),
     );
   }
 
+  Widget buildLabelsContainer(List<String> labels) {
+    Practice getPracticeType(int labelCount) {
+      if (labelCount == 0) return Practice.bad;
+      if (labelCount == 1) return Practice.average;
+      return Practice.good;
+    }
+    IconData icon_ = getIconForPractice(getPracticeType(labels.length));
+    Color color_ = getColorForPractice(getPracticeType(labels.length));
+
+    List<Widget> labelEntries = labels.map((label) {
+      String description = ScoreCalculation.getLabelDescription(label);
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 15.0),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/labels/${label.toLowerCase()}.png',
+                  width: 100,
+                  height: 100,
+                ),
+                const SizedBox(width: 15),
+                const Icon(Icons.check_circle, color: Colors.green, size: 28),
+              ],
+            ),
+            SizedBox(height: 15),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                description,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }).toList();
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+      margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        color: color_.withOpacity(0.25),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          initiallyExpanded: false,
+          leading: Icon(
+            icon_,
+            color: color_,
+            size: 28,
+          ),
+          title: const Text(
+            "Labels",
+            style: TextStyle(
+                color: Colors.black87,
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+            ),
+          ),
+          children: labelEntries,
+        ),
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    /* TODO: TEMPS TO BE REPLACED BY FIREBASE DATA */
-    EvaluationContainer productInfo =
-        EvaluationContainer("Info", Practice.info, [
-      'Name : ${productDetails.name}',
-      'Company: ${productDetails.brand}',
-      'Category: ${productDetails.category}',
-      'Code: ${widget.productCode}'
-    ]);
+    String material = productDetails.materials.isNotEmpty ? productDetails.materials[0] : 'N/A';
+    EvaluationContainer productInfo = EvaluationContainer(
+        "Info",
+        Practice.info,
+        ['Name : ${productDetails.name}', 'Company: ${productDetails.brand}', 'Category: ${productDetails.category}', 'Code: ${widget.productCode}']);
 
     List<EvaluationContainer> evaluations = [
       EvaluationContainer(
@@ -323,16 +414,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       EvaluationContainer(
         "Materials",
         getPracticeFromScore(productDetails.materialScore),
-        [
-          "Score: ${productDetails.materialScore}",
-          "Material type: ${productDetails.materials}",
-          "Very Recyclable"
-        ],
-      ),
-      EvaluationContainer(
-        "Labels",
-        Practice.bad,
-        ["Certifications are lacking", "Incomplete product information"],
+        ["Score: ${productDetails.materialScore}", "Material type: $material", ...ScoreCalculation.getMaterialComments(material)],
       ),
     ];
 
@@ -368,13 +450,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color:
+                  Colors.black87,
                 ),
               ),
             ),
             Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
+              const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
               child: IntrinsicHeight(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -480,7 +563,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: evaluationWidgets,
+                children: [
+                  ...evaluationWidgets, buildLabelsContainer(productDetails.labels)],
               ),
             ),
             const SizedBox(height: 32),

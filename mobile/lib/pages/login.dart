@@ -18,9 +18,6 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  final AuthService _authService = AuthService();
-  final CredService _credService = CredService();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,11 +66,11 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(height: 20.0),
               ElevatedButton(
                 onPressed: () async {
-                  dynamic credential = await _authService.signInEmail(
+                  await AuthService.signInEmail(
                       _emailController.text.trim(),
-                      _passwordController.text
+                      _passwordController.text,
+                      context
                   );
-                  _credService.login(credential, context);
                 },
                 child: Text('Login', style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(
