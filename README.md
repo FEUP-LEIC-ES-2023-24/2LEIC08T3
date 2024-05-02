@@ -100,3 +100,19 @@ Overall, we struggled more with scrum/agile/sprint-planning techniques, and thin
 - [#4: As a app user, I want to create and register an account](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/4)
 - [#5: As a app user, I want to consult detailed information about a product](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/5)
 - [#3: As an app user, I want to be able to search for products by name](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/3)
+
+
+## Sprint 2
+In this sprint, we attempted to implement most of the functionalities where the map would be important and to create a page for adding products from the application, as well as to improve the functioning of the database. In addition to this, we made some enhancements to the application overall. Overall, we were able to complete a large portion of the proposed user stories for this sprint. We encountered some issues with code merging.
+
+### The Good
+Once again, we were able to fulfill the majority of the user stories and improve our skills in database manipulation and Flutter development.
+
+### The Bad
+This time, the issues didn't focus so much on sprint organization, but rather on coordinating different code in Git, especially with conflicts during merging.
+
+### Project Board At The Beginning of Sprint 2
+
+### Project Board At The End of Sprint 2
+
+### User Stories concluded
