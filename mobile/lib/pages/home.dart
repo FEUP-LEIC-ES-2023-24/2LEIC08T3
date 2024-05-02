@@ -5,9 +5,11 @@ import 'package:greenscan/models/search_model.dart';
 import 'package:greenscan/pages/product-detail-page.dart';
 import 'package:greenscan/pages/menu.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomePage extends StatelessWidget {
-  HomePage({Key? key}) : super(key: key);
+  User user;
+  HomePage({Key? key, required this.user}) : super(key: key);
 
   List<SearchModel> searches = [];
   List<InventoryModel> inventory = [];
@@ -20,11 +22,13 @@ class HomePage extends StatelessWidget {
     inventory = InventoryModel.getInventory();
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     getSearches();
     return Scaffold(
-      drawer: SideBar(),
+      drawer: SideBar(
+        user: user,
+      ),
       appBar: appBar(context),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -32,15 +36,38 @@ class HomePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             searchMethod(context),
-            const SizedBox(height: 40),
+            const SizedBox(height: 10),
             SearchesMethod(),
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
             InventoryMethod(),
-            const SizedBox(height: 90),
-            ScanMethod(context),
           ],
         ),
       ),
+      floatingActionButton: Container(
+        width: 160.0,
+        height: 60.0,
+        child: FloatingActionButton(
+          onPressed: ()  {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => BarcodeReaderPage(user: user,)),
+            );
+          },
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+          backgroundColor: const Color(0xff4b986c),
+          child: const Text(
+            'Scan',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w900,
+              fontSize: 25,
+            ),
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -93,7 +120,7 @@ class HomePage extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ProductDetailPage(productCode: value),
+              builder: (context) => ProductDetailPage(productCode: value, user: user,),
             ),
           ),
         },
@@ -223,53 +250,6 @@ class HomePage extends StatelessWidget {
             },
           ),
         ),
-      ],
-    );
-  }
-
-  Column ScanMethod(BuildContext context) {
-    return Column(
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 50),
-        ),
-        Center(
-          child: SizedBox(
-            width: 150,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: () async {
-                String barcodeResult = await FlutterBarcodeScanner.scanBarcode(
-                  '#ff6666', // Cor da barra de cima da tela
-                  'Cancelar', // Texto do botão de cancelar
-                  true, // Mostrar alerta de flash
-                  ScanMode.BARCODE, // Modo de escaneamento (código de barras)
-                );
-
-                if (barcodeResult != '-1') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => BarcodeReaderPage()),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xff4b986c),
-              ),
-              child: const Center(
-                child: Text(
-                  'Scan',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 25,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        )
       ],
     );
   }

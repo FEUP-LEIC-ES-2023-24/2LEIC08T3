@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
 import 'package:greenscan/Services/firebase.dart';
 import 'package:greenscan/Services/product.dart';
 import 'package:greenscan/components/loading_screen.dart';
@@ -10,10 +12,9 @@ import '../utils/score_calculation.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final String productCode;
+  User user;
 
-  const ProductDetailPage({
-    required this.productCode,
-  });
+  ProductDetailPage({required this.productCode, required this.user});
 
   @override
   _ProductDetailPageState createState() => _ProductDetailPageState();
@@ -45,6 +46,40 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       search: "search",
       materials: ["materials"],
       labels: ["labels"]);
+
+  /*
+  if (snapshot.exists) {
+  // add the scan to the history
+  final docRef =
+  FirebaseFirestore.instance.collection("users").doc(widget.user.uid);
+  final doc = await docRef.get();
+
+  if (!doc.exists) {
+  print("couldn't find the user!");
+  } else {
+  final data = doc.data() as Map<String, dynamic>;
+  final historyData;
+
+  if (data.containsKey('history')) {
+  historyData = data['history'] as List<String>;
+
+  if (!historyData.contains(widget.productCode)) {
+  historyData.add(widget.productCode);
+
+  await docRef.update({
+  'history': historyData,
+  });
+  }
+  } else {
+  historyData = [widget.productCode];
+
+  await docRef.update({
+  'history': historyData,
+  });
+  }
+  }
+
+   */
 
   @override
   void initState() {
@@ -270,10 +305,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     List<EvaluationContainer> evaluations = [
       EvaluationContainer(
         "Transport",
+
         getPracticeFromScore(product.transportScore),
         [
           'Score: ${product.transportScore}',
           "Country of Origin: ${product.country}",
+
           "Delivery is efficient",
           "Packaging is minimal"
         ],
@@ -361,6 +398,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                             backgroundColor: Colors.grey[200],
                                             color: getSustainabilityColor(
                                                 product.sustainableScore),
+
                                           ),
                                         ),
                                       ),

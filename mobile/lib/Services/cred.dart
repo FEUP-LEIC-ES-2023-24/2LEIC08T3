@@ -8,35 +8,33 @@ import 'package:greenscan/Services/auth.dart';
 import '../pages/home.dart';
 
 class CredService {
-
   static void showErrorMsg(context, tittle, text) {
     showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(tittle),
-            content: Text(text),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(tittle),
+          content: Text(text),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 
-
   static void login(context) {
-
     if (AuthService.dbUser == null) {
       if (kDebugMode) {
         print("error getting firestore user");
       }
-      showErrorMsg(context, "Database Error", "There was an error in the database");
+      showErrorMsg(
+          context, "Database Error", "There was an error in the database");
       return;
     }
 
@@ -44,14 +42,15 @@ class CredService {
       if (kDebugMode) {
         print("error getting authentication user");
       }
-      showErrorMsg(context, "Database Error", "There was an error in the database");
+      showErrorMsg(
+          context, "Database Error", "There was an error in the database");
       return;
     }
 
     Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => HomePage()),
-    );
+        context,
+        MaterialPageRoute(
+            builder: (context) => HomePage(user: AuthService.user!)));
   }
 
   static void register(context) {
@@ -75,7 +74,10 @@ class CredService {
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => HomePage()),
+      MaterialPageRoute(
+          builder: (context) => HomePage(
+                user: AuthService.user!,
+              )),
     );
   }
 }
