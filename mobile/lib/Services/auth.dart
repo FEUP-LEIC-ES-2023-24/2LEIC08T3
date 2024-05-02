@@ -1,46 +1,71 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:greenscan/Services/cred.dart';
+import 'package:greenscan/Services/firebase.dart';
+import 'package:greenscan/Services/dbUser.dart';
+import 'package:greenscan/Services/product.dart';
 
 class AuthService {
+  static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  static User? user; //firebase user info (credentials)
+  static DbUser? dbUser; //firestore user info (custom info)
 
-  Future signInEmail(String email, String password) async {
+  static Future signInEmail(String email, String password, context) async {
+    UserCredential credential;
 
     try {
-      UserCredential credential = await _auth.signInWithEmailAndPassword(
-          email: email,
-          password: password
-      );
-      User? user = credential.user;
-      return user;
+      credential = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
     } catch (e) {
-      return e;
+      e as FirebaseAuthException;
+      CredService.showErrorMsg(context, "Invalid Credentials", e.message);
+      return;
     }
+
+    user = credential.user;
+    await DataBase.firebaseGetUser();
+    CredService.login(context);
   }
 
-
-  Future registerEmail(String email, String password, String secondPassword) async {
-
+  static Future registerEmail(String userName, String email, String password,
+      String secondPassword, context) async {
     if (password != secondPassword) {
-      FirebaseAuthException exception = FirebaseAuthException(
-          code: "whatever",
-          message: "Different passwords"
-      );
-      return exception;
+      CredService.showErrorMsg(
+          context, "Invalid Credentials", "Passwords not matching");
+      return;
     }
+
+    if (userName.isEmpty) {
+      CredService.showErrorMsg(
+          context, "Invalid Credentials", "User name empty");
+      return;
+    }
+
+    UserCredential credential;
 
     try {
-
-      UserCredential credential = await _auth.createUserWithEmailAndPassword(
-          email: email,
-          password: password
-      );
-
-      User? user = credential.user;
-      return user;
-
+      credential = await _auth.createUserWithEmailAndPassword(
+          email: email, password: password);
     } catch (e) {
-      return e;
+      e as FirebaseAuthException;
+      CredService.showErrorMsg(context, "Invalid Credentials", e.message);
+      return;
     }
+
+    user = credential.user;
+
+    try {
+      await user!.updateDisplayName(userName);
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+    }
+
+    dbUser = DbUser(name: userName, email: email);
+    await DataBase.firebaseAddUser();
+
+    CredService.register(context);
   }
 }
