@@ -55,6 +55,7 @@ class _AddProductPageState extends State<AddProductPage> {
   final List<String> availableLabels = [
     "Carbon Trust",
     "EU Organic",
+    "Fairtrade",
     "Forest Stewardship Council (FSC)",
     "Green Dot",
     "Rainforest Alliance"
@@ -145,11 +146,18 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 
+  String? convertStringToJson(String string) {
+    return string.toLowerCase().replaceAll(' ', '_');
+  }
+
   Future<bool> _submitForm() async {
     if (_formKey.currentState!.validate() &&
             labels.isNotEmpty /*&& TODO restore
         _image != null*/
         ) {
+    for (var i = 0; i < labels.length; i++) {
+      labels[i] = convertStringToJson(labels[i])!;
+    }
       await DataBase.firebaseAddProduct(
           _idController.text.trim(),
           Product(
@@ -164,7 +172,7 @@ class _AddProductPageState extends State<AddProductPage> {
               category: category!,
               country: _countryController.text.trim(),
               search: _nameController.text.trim().toLowerCase(),
-              materials: [selectedMaterial!],
+              materials: [convertStringToJson(selectedMaterial!)!],
               labels: labels));
       return true;
     } else {

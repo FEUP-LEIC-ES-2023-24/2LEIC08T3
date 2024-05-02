@@ -50,7 +50,7 @@
       "Non-renewable iron ore source"
     ]
   },
-  "plastic-pet": {
+  "plastic_pet": {
     "recyclability": 75,
     "biodegradability": 0,
     "renewability": 15,
@@ -61,7 +61,7 @@
       "Can be reused but quality may degrade"
     ]
   },
-  "plastic-hdpe": {
+  "plastic_hdpe": {
     "recyclability": 65,
     "biodegradability": 0,
     "renewability": 15,
@@ -70,7 +70,7 @@
       "Durable and moderately recyclable."
     ]
   },
-  "plastic-pvc": {
+  "plastic_pvc": {
     "recyclability": 25,
     "biodegradability": 0,
     "renewability": 10,
@@ -80,7 +80,7 @@
       "Packaging raises health concerns."
     ]
   },
-  "plastic-ldpe": {
+  "plastic_ldpe": {
     "recyclability": 20,
     "biodegradability": 0,
     "renewability": 15,
@@ -89,7 +89,7 @@
       "Recyclable but less commonly accepted"
     ]
   },
-  "plastic-pp": {
+  "plastic_pp": {
     "recyclability": 25,
     "biodegradability": 0,
     "renewability": 20,
@@ -98,7 +98,7 @@
       "Increasingly being recycled."
     ]
   },
-  "plastic-ps": {
+  "plastic_ps": {
     "recyclability": 10,
     "biodegradability": 0,
     "renewability": 5,
