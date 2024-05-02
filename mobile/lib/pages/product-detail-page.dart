@@ -33,6 +33,9 @@ class EvaluationContainer {
 class _ProductDetailPageState extends State<ProductDetailPage> {
   double progress = 0;
   bool isLoading = true;
+
+  List<Map<String, dynamic>> stores = [];
+
   Product product = Product(
       sustainableScore: 0,
       transportScore: 0,
@@ -47,12 +50,61 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       materials: ["materials"],
       labels: ["labels"]);
 
+  void _showStoreSelection() {
+    fetchStoresForProduct(); // Fetch store data when the button is pressed
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Available Stores'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min, // Keep dialog compact
+          children: [
+            // Show stores based on the fetched data
+            for (var store in stores)
+              ListTile(
+                title: Text(store['name']),
+                subtitle: Text(store['location']),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     fetchProduct();
     LocationService.requestLocationPermission();
     ScoreCalculation.loadJson();
+  }
+
+  Future<void> fetchStoresForProduct() async {
+    try {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection('items')
+          .doc(widget.productCode)
+          .get();
+
+      if (snapshot.exists) {
+        var data = snapshot.data() as Map<String, dynamic>;
+        var storesData = data['lojas'] as List<dynamic>; // Assuming 'lojas' is the field containing store data
+
+        // Fetch details of each store
+        for (var storeRef in storesData) {
+          DocumentSnapshot storeSnapshot = await storeRef.get();
+          if (storeSnapshot.exists) {
+            var storeData = storeSnapshot.data() as Map<String, dynamic>;
+            stores.add({
+              'name': storeData['name'],
+              'location': storeData['location'],
+            });
+          }
+        }
+      }
+    } catch (e) {
+      print('Error fetching stores for product: $e');
+    }
   }
 
   Future<void> fetchProduct() async {
@@ -320,6 +372,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       ),
     ];
 
+    ElevatedButton(
+      onPressed: () {
+        _showStoreSelection();
+      },
+      child: const Text('Stores')
+    );
+
     List<Widget> evaluationWidgets = evaluations
         .map((evaluation) => buildEvaluationContainer(evaluation))
         .toList();
@@ -471,6 +530,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               ),
             ),
             const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: _showStoreSelection,
+              child: const Text('Escolher Loja'),
+            ),
           ],
         ),
       ),
