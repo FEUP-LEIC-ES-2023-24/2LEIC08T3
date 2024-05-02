@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:greenscan/Services/firebase.dart';
+import 'package:greenscan/Services/product.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AddProductPage extends StatefulWidget {
@@ -11,6 +13,7 @@ class AddProductPage extends StatefulWidget {
 
 class _AddProductPageState extends State<AddProductPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _idController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _brandController = TextEditingController();
   final TextEditingController _countryController = TextEditingController();
@@ -21,24 +24,45 @@ class _AddProductPageState extends State<AddProductPage> {
   final ImagePicker _picker = ImagePicker();
 
   final List<String> materials = [
-    "Paper", "Cardboard", "Glass", "Aluminum", "Steel",
-    "Plastic PET", "Plastic HDPE", "Plastic PVC", "Plastic LDPE",
-    "Plastic PP", "Plastic PS", "Bioplastics", "Mixed"
+    "Paper",
+    "Cardboard",
+    "Glass",
+    "Aluminum",
+    "Steel",
+    "Plastic PET",
+    "Plastic HDPE",
+    "Plastic PVC",
+    "Plastic LDPE",
+    "Plastic PP",
+    "Plastic PS",
+    "Bioplastics",
+    "Mixed"
   ];
 
   final List<String> categories = [
-    "Snacks", "Fruits and Vegetables", "Beverages", "Dairies",
-    "Cereal and Potatoes", "Meats", "Fermented Foods", "Meals",
-    "Condiments", "Other"
+    "Snacks",
+    "Fruits and Vegetables",
+    "Beverages",
+    "Dairies",
+    "Cereal and Potatoes",
+    "Meats",
+    "Fermented Foods",
+    "Meals",
+    "Condiments",
+    "Other"
   ];
 
   final List<String> availableLabels = [
-    "Carbon Trust", "EU Organic", "Forest Stewardship Council (FSC)",
-    "Green Dot", "Rainforest Alliance"
+    "Carbon Trust",
+    "EU Organic",
+    "Forest Stewardship Council (FSC)",
+    "Green Dot",
+    "Rainforest Alliance"
   ];
 
   Future<void> _pickImage() async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.camera);
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
         _image = pickedFile;
@@ -121,26 +145,32 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate() && labels.isNotEmpty && _image != null) {
-      Map<String, dynamic> formData = {
-        'name': _nameController.text,
-        'brand': _brandController.text,
-        'category': category,
-        'material': selectedMaterial,
-        'country': _countryController.text,
-        'labels': labels,
-        'imagePath': _image!.path
-      };
-
-      /*
-      print('Form Data:');
-      formData.forEach((key, value) {
-        print('$key: $value');
-      });
-      */
+  Future<bool> _submitForm() async {
+    if (_formKey.currentState!.validate() &&
+            labels.isNotEmpty /*&& TODO restore
+        _image != null*/
+        ) {
+      await DataBase.firebaseAddProduct(
+          _idController.text.trim(),
+          Product(
+              sustainableScore: 0,
+              transportScore: 0,
+              materialScore: 0,
+              labelScore: 0,
+              name: _nameController.text.trim(),
+              brand: _brandController.text.trim(),
+              imageUrl: "",
+              //_image!.path, TODO restore
+              category: category!,
+              country: _countryController.text.trim(),
+              search: _nameController.text.trim().toLowerCase(),
+              materials: [selectedMaterial!],
+              labels: labels));
+      return true;
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please complete the form before submitting.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Please complete the form before submitting.')));
+      return false;
     }
   }
 
@@ -159,53 +189,86 @@ class _AddProductPageState extends State<AddProductPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextFormField(
+                controller: _idController,
+                decoration: _buildDecoration('product ID'),
+                validator: (value) =>
+                    value!.isEmpty ? 'Please enter an ID' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
                 controller: _nameController,
                 decoration: _buildDecoration('Name'),
-                validator: (value) => value!.isEmpty ? 'Please enter a name' : null,
+                validator: (value) =>
+                    value!.isEmpty ? 'Please enter a name' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _brandController,
                 decoration: _buildDecoration('Brand'),
-                validator: (value) => value!.isEmpty ? 'Please enter a brand' : null,
+                validator: (value) =>
+                    value!.isEmpty ? 'Please enter a brand' : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: category,
                 decoration: _buildDecoration('Category'),
-                onChanged: (String? newValue) => setState(() => category = newValue),
-                items: categories.map<DropdownMenuItem<String>>((String value) => DropdownMenuItem<String>(value: value, child: Text(value))).toList(),
-                validator: (value) => value == null ? 'Please select a category' : null,
+                onChanged: (String? newValue) =>
+                    setState(() => category = newValue),
+                items: categories
+                    .map<DropdownMenuItem<String>>((String value) =>
+                        DropdownMenuItem<String>(
+                            value: value, child: Text(value)))
+                    .toList(),
+                validator: (value) =>
+                    value == null ? 'Please select a category' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _countryController,
                 decoration: _buildDecoration('Country of Origin'),
-                validator: (value) => value!.isEmpty ? 'Please enter a country of origin' : null,
+                validator: (value) =>
+                    value!.isEmpty ? 'Please enter a country of origin' : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: selectedMaterial,
                 decoration: _buildDecoration('Material'),
-                onChanged: (String? newValue) => setState(() => selectedMaterial = newValue),
-                items: materials.map<DropdownMenuItem<String>>((String value) => DropdownMenuItem<String>(value: value, child: Text(value))).toList(),
-                validator: (value) => value == null ? 'Please select a material' : null,
+                onChanged: (String? newValue) =>
+                    setState(() => selectedMaterial = newValue),
+                items: materials
+                    .map<DropdownMenuItem<String>>((String value) =>
+                        DropdownMenuItem<String>(
+                            value: value, child: Text(value)))
+                    .toList(),
+                validator: (value) =>
+                    value == null ? 'Please select a material' : null,
               ),
               const SizedBox(height: 16),
-              const Text('Select Labels:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black)),
+              const Text('Select Labels:',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black)),
               ...availableLabels.map((label) => _buildCheckboxTile(label)),
               const SizedBox(height: 24),
               _buildImagePicker(),
               const SizedBox(height: 20),
               Center(
                 child: ElevatedButton(
-                  onPressed: _submitForm,
+                  onPressed: () async {
+                    if (await _submitForm()) {
+                      _formKey.currentState!.reset();
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
                     backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 50),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
-                    textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 50),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25.0)),
+                    textStyle: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   child: const Text("Add Product"),
                 ),

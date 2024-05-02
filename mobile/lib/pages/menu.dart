@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:greenscan/Services/auth.dart';
 import 'package:greenscan/pages/add_product.dart';
 import 'package:greenscan/pages/barcode.dart';
 import 'package:greenscan/pages/login.dart';
@@ -44,7 +45,7 @@ class SideBar extends StatelessWidget {
                 }  
               },
             ),
-            if (true) // TODO: Add conditional for add user 
+            if (AuthService.dbUser!.admin)
               ListTile(
                 leading: const Icon(Icons.inventory),
                 title: const Text('Add Product'),

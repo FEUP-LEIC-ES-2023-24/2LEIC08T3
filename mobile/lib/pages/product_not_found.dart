@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:greenscan/pages/add_product.dart';
 
+import '../Services/auth.dart';
+
 class ProductNotFoundPage extends StatelessWidget {
   const ProductNotFoundPage({super.key});
 
@@ -39,6 +41,7 @@ class ProductNotFoundPage extends StatelessWidget {
               ),
             ),
             const Spacer(),
+            if (AuthService.dbUser!.admin)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: ElevatedButton(

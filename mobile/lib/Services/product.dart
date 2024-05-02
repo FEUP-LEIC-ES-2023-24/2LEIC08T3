@@ -6,6 +6,7 @@ class Product {
   final int sustainableScore;
   final int transportScore;
   final int materialScore;
+  final int labelScore;
 
   //from database
   final String name;
@@ -16,12 +17,14 @@ class Product {
   final String search;
   final List<String> materials;
   final List<String> labels;
+
   //final List<Store> stores; TODO
 
   Product(
       {required this.sustainableScore,
       required this.transportScore,
       required this.materialScore,
+      required this.labelScore,
       required this.name,
       required this.brand,
       required this.imageUrl,
@@ -30,7 +33,8 @@ class Product {
       required this.search,
       required this.materials,
       required this.labels});
-      //required this.stores TODO
+
+  //required this.stores TODO
 
   static Future<Product?> buildProductDB(Map<String, dynamic>? data) async {
     if (data == null) return null;
@@ -48,6 +52,7 @@ class Product {
     int transportScore_ = 0;
     int materialScore_ = 0;
     int sustainableScore_ = 0;
+    int labelScore_ = 0;
 
     final country_ = data['country'];
     final materials_ = (data['materials'] as List<dynamic> ?? [])
@@ -72,22 +77,25 @@ class Product {
         print("invalid distance");
         return null;
       }
-      //transportScore_ = ScoreCalculation.computeTransportScore(distance).toInt();
+      transportScore_ = ScoreCalculation.getTransportScore(distance).toInt();
     } catch (error) {
       print("Error calculating transport score: $error");
       return null;
     }
 
-    //TODO
-    //materialScore_ = func(materials,...)
+    //TODO change to array of materials
+    materialScore_ = ScoreCalculation.getMaterialScore(materials_[0]);
 
-    //TODO
-    //sustainableScore_ = func(materialScore_, transportationScore_...)
+    labelScore_ = ScoreCalculation.getLabelScore(labels_.length);
+
+    sustainableScore_ = ScoreCalculation.getSustainabilityScore(
+        transportScore_, materialScore_, labelScore_);
 
     return Product(
         sustainableScore: sustainableScore_,
         transportScore: transportScore_,
         materialScore: materialScore_,
+        labelScore: labelScore_,
         name: data['name'],
         brand: data['brand'],
         imageUrl: data['imageUrl'],
