@@ -25,10 +25,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         return windows;
       case TargetPlatform.linux:
@@ -78,6 +75,15 @@ class DefaultFirebaseOptions {
     authDomain: 'greenscan-leic.firebaseapp.com',
     storageBucket: 'greenscan-leic.appspot.com',
     measurementId: 'G-8L1KTWD17X',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyBGg7-b2r0h5G3rxYjYbdvl7WMInSrUAlI',
+    appId: '1:520988089739:ios:98bf61c15d46d835fbe38e',
+    messagingSenderId: '520988089739',
+    projectId: 'greenscan-leic',
+    storageBucket: 'greenscan-leic.appspot.com',
+    iosBundleId: 'com.example.greenscan',
   );
 
 }

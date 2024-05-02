@@ -52,19 +52,19 @@ class ProductDetails {
 
   factory ProductDetails.fromFirestore(Map<String, dynamic> data) {
     return ProductDetails(
-      sustainableScore: data['sustainableScore'] ?? 0, // if -1, means it hasn't been calculated
-      transportScore: data['transportScore'] ?? 0,
-      materialScore: data['materialScore'] ?? 0,
-      labelScore: data['labelScore'] ?? 0,
+        sustainableScore: data['sustainableScore'] ?? 0, // if -1, means it hasn't been calculated
+        transportScore: data['transportScore'] ?? 0,
+        materialScore: data['materialScore'] ?? 0,
+        labelScore: data['labelScore'] ?? 0,
 
-      name: data['name'] ?? 'Unknown Product',
-      brand: data['brand'] ?? 'Unknown Brand',
-      imageUrl: data['imageUrl'] ?? 'default_image_url',
-      category: data['category'] ?? 'Unknown Category',
-      country: data['country'] ?? 'Unknown Country',
-      materials: List<String>.from(data['materials'] as List<dynamic> ?? []),
-      labels: List<String>.from(data['labels'] as List<dynamic> ?? []),
-      search: data['search'] ?? ''
+        name: data['name'] ?? 'Unknown Product',
+        brand: data['brand'] ?? 'Unknown Brand',
+        imageUrl: data['imageUrl'] ?? 'default_image_url',
+        category: data['category'] ?? 'Unknown Category',
+        country: data['country'] ?? 'Unknown Country',
+        materials: List<String>.from(data['materials'] as List<dynamic> ?? []),
+        labels: List<String>.from(data['labels'] as List<dynamic> ?? []),
+        search: data['search'] ?? ''
     );
   }
 
@@ -266,20 +266,20 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           childrenPadding: const EdgeInsets.all(6.0),
           children: evaluation.comments
               .map((comment) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10.0),
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 20.0),
-                        Expanded(
-                          child: Text(
-                            "• $comment",
-                            style: const TextStyle(
-                                color: Colors.black87, fontSize: 18),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ))
+            padding: const EdgeInsets.only(bottom: 10.0),
+            child: Row(
+              children: [
+                const SizedBox(width: 20.0),
+                Expanded(
+                  child: Text(
+                    "• $comment",
+                    style: const TextStyle(
+                        color: Colors.black87, fontSize: 18),
+                  ),
+                ),
+              ],
+            ),
+          ))
               .toList(),
         ),
       ),
@@ -417,13 +417,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color:
-                      Colors.black87,
+                  Colors.black87,
                 ),
               ),
             ),
             Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
+              const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
               child: IntrinsicHeight(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -525,7 +525,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                    ...evaluationWidgets, buildLabelsContainer(productDetails.labels)],
+                  ...evaluationWidgets, buildLabelsContainer(productDetails.labels)],
               ),
             ),
             const SizedBox(height: 32),
