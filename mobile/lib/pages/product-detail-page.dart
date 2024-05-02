@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:greenscan/components/loading_screen.dart';
 import 'package:greenscan/pages/product_not_found.dart';
 
@@ -8,10 +10,9 @@ import '../utils/score_calculation.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final String productCode;
+  User user;
 
-  const ProductDetailPage({
-    required this.productCode,
-  });
+  ProductDetailPage({required this.productCode, required this.user});
 
   @override
   _ProductDetailPageState createState() => _ProductDetailPageState();
@@ -32,7 +33,7 @@ class ProductDetails {
   final List<String> materials;
   final List<String> labels;
   final String search;
-
+  
   ProductDetails({
     required this.sustainableScore,
     required this.transportScore,
@@ -56,7 +57,6 @@ class ProductDetails {
         transportScore: data['transportScore'] ?? 0,
         materialScore: data['materialScore'] ?? 0,
         labelScore: data['labelScore'] ?? 0,
-
         name: data['name'] ?? 'Unknown Product',
         brand: data['brand'] ?? 'Unknown Brand',
         imageUrl: data['imageUrl'] ?? 'default_image_url',
@@ -132,11 +132,42 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           .get();
 
       if (snapshot.exists) {
+        // add the scan to the history
+        final docRef =
+            FirebaseFirestore.instance.collection("users").doc(widget.user.uid);
+        final doc = await docRef.get();
+
+        if (!doc.exists) {
+          print("couldn't find the user!");
+        } else {
+          final data = doc.data() as Map<String, dynamic>;
+          final historyData;
+
+          if (data.containsKey('history')) {
+            historyData = data['history'] as List<String>;
+
+            if (!historyData.contains(widget.productCode)) {
+              historyData.add(widget.productCode);
+
+              await docRef.update({
+                'history': historyData,
+              });
+            }
+          } else {
+            historyData = [widget.productCode];
+
+            await docRef.update({
+              'history': historyData,
+            });
+          }
+        }
+
         Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
         productDetails = ProductDetails.fromFirestore(data);
 
         if (productDetails.transportScore == -1) {
-          double? distance = await LocationService.getDistanceToCountry(productDetails.country);
+          double? distance = await LocationService.getDistanceToCountry(
+              productDetails.country);
           if (distance != null) {
             double calculatedScore = ScoreCalculation.getTransportScore(distance);
             productDetails = productDetails.copyWith(transportScore: calculatedScore.truncate());
@@ -260,9 +291,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               style: const TextStyle(
                   color: Colors.black87,
                   fontSize: 20,
-                  fontWeight: FontWeight.bold
-              )
-          ),
+                  fontWeight: FontWeight.bold)),
           childrenPadding: const EdgeInsets.all(6.0),
           children: evaluation.comments
               .map((comment) => Padding(
@@ -375,7 +404,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       EvaluationContainer(
         "Transport",
         getPracticeFromScore(productDetails.transportScore),
-        ['Score: ${productDetails.transportScore}', "Country of Origin: ${productDetails.country}", "Delivery is efficient", "Packaging is minimal"],
+        [
+          'Score: ${productDetails.transportScore}',
+          "Country of Origin: ${productDetails.country}",
+          "Delivery is efficient",
+          "Packaging is minimal"
+        ],
       ),
       EvaluationContainer(
         "Materials",
@@ -447,23 +481,28 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                       TweenAnimationBuilder<double>(
                                         tween: Tween(begin: 0, end: progress),
                                         duration: const Duration(seconds: 2),
-                                        builder: (context, value, child) => SizedBox(
+                                        builder: (context, value, child) =>
+                                            SizedBox(
                                           width: 100,
                                           height: 100,
                                           child: CircularProgressIndicator(
                                             value: value,
                                             strokeWidth: 10,
                                             backgroundColor: Colors.grey[200],
-                                            color: getSustainabilityColor(productDetails.sustainableScore),
+                                            color: getSustainabilityColor(
+                                                productDetails
+                                                    .sustainableScore),
                                           ),
                                         ),
                                       ),
                                       AnimatedSwitcher(
                                         duration: const Duration(seconds: 2),
-                                        transitionBuilder: (Widget child, Animation<double> animation) {
+                                        transitionBuilder: (Widget child,
+                                            Animation<double> animation) {
                                           return FadeTransition(
                                             opacity: animation,
-                                            child: ScaleTransition(scale: animation, child: child),
+                                            child: ScaleTransition(
+                                                scale: animation, child: child),
                                           );
                                         },
                                       ),

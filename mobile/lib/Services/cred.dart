@@ -50,7 +50,7 @@ class CredService {
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => HomePage()),
+      MaterialPageRoute(builder: (context) => HomePage(user: credential))),
     );
   }
 
@@ -75,7 +75,7 @@ class CredService {
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => HomePage()),
+      MaterialPageRoute(builder: (context) => HomePage(user: credential,)),
     );
   }
 }

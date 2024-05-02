@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:greenscan/pages/product-detail-page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class BarcodeReaderPage extends StatefulWidget {
+  User user;
+  BarcodeReaderPage({
+    required this.user,
+  });
   @override
   _BarcodeReaderPageState createState() => _BarcodeReaderPageState();
 }
@@ -12,8 +17,8 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
 
   @override
   void initState() {
-    super.initState();
     scanBarcode();
+    super.initState();
   }
 
   Future<String> scanBarcode() async {
@@ -32,7 +37,7 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ProductDetailPage(productCode: barcode),
+          builder: (context) => ProductDetailPage(productCode: barcode, user: widget.user,),
         ),
       );
 
@@ -47,7 +52,7 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProductDetailPage(productCode: barcode),
+        builder: (context) => ProductDetailPage(productCode: barcode, user: widget.user,),
       ),
     );
   }
