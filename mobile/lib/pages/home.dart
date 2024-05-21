@@ -120,7 +120,7 @@ class HomePage extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ProductDetailPage(productCode: value, user: user,),
+              builder: (context) => ProductDetailPage(productCodes: [value], user: user,),
             ),
           ),
         },

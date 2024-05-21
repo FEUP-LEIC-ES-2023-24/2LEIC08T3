@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -7,16 +6,16 @@ import 'package:greenscan/Services/product.dart';
 import 'package:greenscan/components/loading_screen.dart';
 import 'package:greenscan/pages/product_not_found.dart';
 import 'package:greenscan/pages/google-maps.dart';
-
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../Services/store.dart';
 import '../utils/location_services.dart';
 import '../utils/score_calculation.dart';
 
 class ProductDetailPage extends StatefulWidget {
-  final String productCode;
-  User user;
+  final List<String> productCodes;
+  final User user;
 
-  ProductDetailPage({super.key, required this.productCode, required this.user});
+  ProductDetailPage({super.key, required this.productCodes, required this.user});
 
   @override
   _ProductDetailPageState createState() => _ProductDetailPageState();
@@ -35,59 +34,47 @@ class EvaluationContainer {
 class _ProductDetailPageState extends State<ProductDetailPage> {
   double progress = 0;
   bool isLoading = true;
-
-  List<Map<String, dynamic>> stores = [];
-
-  Product product = Product(
-      sustainableScore: 0,
-      transportScore: 0,
-      materialScore: 0,
-      labelScore: 0,
-      name: "name",
-      brand: "brand",
-      imageUrl: "imageUrl",
-      category: "category",
-      country: "country",
-      search: "search",
-      materials: ["materials"],
-      labels: ["labels"],
-      stores: ["stores"]);
+  List<Product> products = [];
+  PageController _pageController = PageController();
+  int _currentPage = 0;
 
   @override
   void initState() {
     super.initState();
-    fetchProduct();
+    fetchProducts();
     LocationService.requestLocationPermission();
     ScoreCalculation.loadJson();
   }
 
-  Future<void> fetchProduct() async {
-    try {
-      var fetchedProduct = await DataBase.firebaseGetProduct(widget.productCode);
-      fetchedProduct as Product;
-      print(fetchedProduct.stores);
+  Future<void> fetchProducts() async {
+    List<Product> fetchedProducts = [];
+    for (String productCode in widget.productCodes) {
+      try {
+        var fetchedProduct = await DataBase.firebaseGetProduct(productCode);
+        fetchedProduct as Product;
 
-      for (var code in fetchedProduct.stores) {
-        var store = await DataBase.firebaseGetStore(code);
-        print(store);
+        for (var code in fetchedProduct.stores) {
+          var store = await DataBase.firebaseGetStore(code);
+          print(store);
+        }
+
+        if (fetchedProduct != null) {
+          fetchedProducts.add(fetchedProduct);
+        } else {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductNotFoundPage()));
+        }
+      } catch (e) {
+        print('Error fetching product: $e');
       }
-      if (fetchedProduct == null) {
-        Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const ProductNotFoundPage()));
-      } else {
-        print("failed");
-        setState(() {
-          product = fetchedProduct;
-          isLoading = false;
-          progress = product.sustainableScore / 100;
-        });
-      }
-    } catch (e) {
-      print('Error fetching product: $e');
-      setState(() {
-        isLoading = false;
-      });
     }
+
+    setState(() {
+      products = fetchedProducts;
+      isLoading = false;
+      if (products.isNotEmpty) {
+        progress = products.first.sustainableScore / 100;
+      }
+    });
   }
 
   void _showStoreSelection(List<Store> stores) {
@@ -96,8 +83,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       builder: (context) => AlertDialog(
         title: const Text('Available Stores'),
         content: Column(
-          mainAxisSize: MainAxisSize.min, // Keep dialog compact
-          children: [            
+          mainAxisSize: MainAxisSize.min,
+          children: [
             for (var store in stores)
               ListTile(
                 leading: IconButton(
@@ -206,20 +193,20 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           childrenPadding: const EdgeInsets.all(6.0),
           children: evaluation.comments
               .map((comment) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10.0),
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 20.0),
-                        Expanded(
-                          child: Text(
-                            "• $comment",
-                            style: const TextStyle(
-                                color: Colors.black87, fontSize: 18),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ))
+            padding: const EdgeInsets.only(bottom: 10.0),
+            child: Row(
+              children: [
+                const SizedBox(width: 20.0),
+                Expanded(
+                  child: Text(
+                    "• $comment",
+                    style: const TextStyle(
+                        color: Colors.black87, fontSize: 18),
+                  ),
+                ),
+              ],
+            ),
+          ))
               .toList(),
         ),
       ),
@@ -328,46 +315,20 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
   }
 
+  Future<void> _addNewProduct() async {
+    try {
+      var newProductCode = '111'; // Replace with actual product code logic
+      var newProduct = await DataBase.firebaseGetProduct(newProductCode);
+      setState(() {
+        products.add(newProduct as Product);
+      });
+    } catch (e) {
+      print('Error adding new product: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    String material =
-        product.materials.isNotEmpty ? product.materials[0] : 'N/A';
-    EvaluationContainer productInfo =
-        EvaluationContainer("Info", Practice.info, [
-      'Name : ${product.name}',
-      'Company: ${product.brand}',
-      'Category: ${product.category}',
-      'Code: ${widget.productCode}'
-    ]);
-
-    List<EvaluationContainer> evaluations = [
-      EvaluationContainer(
-        "Transport",
-
-        getPracticeFromScore(product.transportScore),
-        [
-          'Score: ${product.transportScore}',
-          "Country of Origin: ${product.country}",
-
-          "Delivery is efficient",
-          "Packaging is minimal"
-        ],
-      ),
-      EvaluationContainer(
-        "Materials",
-        getPracticeFromScore(product.materialScore),
-        [
-          "Score: ${product.materialScore}",
-          "Material type: $material",
-          ...ScoreCalculation.getMaterialComments(material)
-        ],
-      ),
-    ];
-
-    List<Widget> evaluationWidgets = evaluations
-        .map((evaluation) => buildEvaluationContainer(evaluation))
-        .toList();
-
     if (isLoading) {
       return const CustomLoadingScreen();
     }
@@ -375,172 +336,246 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(product.name),
+        title: const Text('Product Comparison'),
         backgroundColor: Colors.green,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Image.network(
-              product.imageUrl,
-              width: double.infinity,
-              height: 200,
-              fit: BoxFit.cover,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                product.name,
-                style: const TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
-              child: IntrinsicHeight(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SizedBox(
-                            width: 100,
-                            height: 100,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Expanded(
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      TweenAnimationBuilder<double>(
-                                        tween: Tween(begin: 0, end: progress),
-                                        duration: const Duration(seconds: 2),
-                                        builder: (context, value, child) =>
-                                            SizedBox(
-                                          width: 100,
-                                          height: 100,
-                                          child: CircularProgressIndicator(
-                                            value: value,
-                                            strokeWidth: 10,
-                                            backgroundColor: Colors.grey[200],
-                                            color: getSustainabilityColor(
-                                                product.sustainableScore),
+      body: Column(
+        children: [
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                Product product = products[index];
+                String material = product.materials.isNotEmpty ? product.materials[0] : 'N/A';
 
+                EvaluationContainer productInfo = EvaluationContainer("Info", Practice.info, [
+                  'Name : ${product.name}',
+                  'Company: ${product.brand}',
+                  'Category: ${product.category}',
+                  'Code: ${product.stores.isNotEmpty ? product.stores.first : 'N/A'}' // Update to get the correct code
+                ]);
+
+                List<EvaluationContainer> evaluations = [
+                  EvaluationContainer(
+                    "Transport",
+                    getPracticeFromScore(product.transportScore),
+                    [
+                      'Score: ${product.transportScore}',
+                      "Country of Origin: ${product.country}",
+                      "Delivery is efficient",
+                      "Packaging is minimal"
+                    ],
+                  ),
+                  EvaluationContainer(
+                    "Materials",
+                    getPracticeFromScore(product.materialScore),
+                    [
+                      "Score: ${product.materialScore}",
+                      "Material type: $material",
+                      ...ScoreCalculation.getMaterialComments(material)
+                    ],
+                  ),
+                ];
+
+                List<Widget> evaluationWidgets = evaluations
+                    .map((evaluation) => buildEvaluationContainer(evaluation))
+                    .toList();
+
+                return SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Image.network(
+                        product.imageUrl,
+                        width: double.infinity,
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          product.name,
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
+                        child: IntrinsicHeight(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 100,
+                                      height: 100,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                                        children: [
+                                          Expanded(
+                                            child: Stack(
+                                              alignment: Alignment.center,
+                                              children: [
+                                                TweenAnimationBuilder<double>(
+                                                  tween: Tween(begin: 0, end: progress),
+                                                  duration: const Duration(seconds: 2),
+                                                  builder: (context, value, child) =>
+                                                      SizedBox(
+                                                        width: 100,
+                                                        height: 100,
+                                                        child: CircularProgressIndicator(
+                                                          value: value,
+                                                          strokeWidth: 10,
+                                                          backgroundColor: Colors.grey[200],
+                                                          color: getSustainabilityColor(product.sustainableScore),
+                                                        ),
+                                                      ),
+                                                ),
+                                                AnimatedSwitcher(
+                                                  duration: const Duration(seconds: 2),
+                                                  transitionBuilder: (Widget child,
+                                                      Animation<double> animation) {
+                                                    return FadeTransition(
+                                                      opacity: animation,
+                                                      child: ScaleTransition(
+                                                          scale: animation, child: child),
+                                                    );
+                                                  },
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ),
+                                        ],
                                       ),
-                                      AnimatedSwitcher(
-                                        duration: const Duration(seconds: 2),
-                                        transitionBuilder: (Widget child,
-                                            Animation<double> animation) {
-                                          return FadeTransition(
-                                            opacity: animation,
-                                            child: ScaleTransition(
-                                                scale: animation, child: child),
-                                          );
-                                        },
+                                    ),
+                                    Text(
+                                      '${product.sustainableScore.toInt()}%',
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
                                       ),
-                                    ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const VerticalDivider(
+                                  color: Colors.black38, thickness: 1, width: 32),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    getImpactString(product.sustainableScore),
+                                    style: const TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            '${product.sustainableScore.toInt()}%',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                    const VerticalDivider(
-                        color: Colors.black38, thickness: 1, width: 32),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.center,
+                      const SizedBox(height: 24),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: buildEvaluationContainer(productInfo),
+                      ),
+                      const SizedBox(height: 24),
+                      const Center(
                         child: Text(
-                          getImpactString(product.sustainableScore),
-                          style: const TextStyle(
-                            color: Colors.black87,
+                          "Sustainable Details",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 28,
                             fontWeight: FontWeight.bold,
-                            fontSize: 18,
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: buildEvaluationContainer(productInfo),
-            ),
-            const SizedBox(height: 24),
-            const Center(
-              child: Text(
-                "Sustainable Details",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ...evaluationWidgets,
-                  buildLabelsContainer(product.labels)
-                ],
-              ),
-            ),
-            const SizedBox(height: 25),
-            Center(
-              child: SizedBox(
-                width: 220,
-                height: 50,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      List<Store> stores = await product.getProductStores();
-                      _showStoreSelection(stores);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      ),
-                    child: const Center(
-                      child: Text(
-                        'Available Stores',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
+                      const SizedBox(height: 6),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ...evaluationWidgets,
+                            buildLabelsContainer(product.labels)
+                          ],
                         ),
                       ),
-                    ),
-                  ),  
+                      const SizedBox(height: 25),
+                      Center(
+                        child: SizedBox(
+                          width: 220,
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              List<Store> stores = await product.getProductStores();
+                              _showStoreSelection(stores);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'Available Stores',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: _addNewProduct,
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.green,
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                ),
+                textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              child: const Text("Compare Product"),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SmoothPageIndicator(
+              controller: _pageController,
+              count: products.length,
+              effect: WormEffect(
+                dotHeight: 12,
+                dotWidth: 12,
+                activeDotColor: Colors.green,
+                dotColor: Colors.grey,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

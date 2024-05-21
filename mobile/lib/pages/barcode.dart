@@ -37,7 +37,7 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ProductDetailPage(productCode: barcode, user: widget.user,),
+          builder: (context) => ProductDetailPage(productCodes: [barcode], user: widget.user,),
         ),
       );
 
@@ -52,7 +52,7 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProductDetailPage(productCode: barcode, user: widget.user,),
+        builder: (context) => ProductDetailPage(productCodes: [barcode], user: widget.user,),
       ),
     );
   }
