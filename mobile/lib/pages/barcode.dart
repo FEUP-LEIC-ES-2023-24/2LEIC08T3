@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:greenscan/pages/product-detail-page.dart';
 
 class BarcodeReaderPage extends StatefulWidget {
   @override
