@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:greenscan/Services/firebase.dart';
@@ -36,7 +35,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   bool isLoading = true;
   List<Product> products = [];
   final PageController _pageController = PageController();
-  int _currentPage = 0;
 
   @override
   void initState() {

@@ -5,13 +5,9 @@ import 'package:greenscan/models/inventory_model.dart';
 import 'package:greenscan/models/search_model.dart';
 import 'package:greenscan/pages/product-detail-page.dart';
 import 'package:greenscan/pages/menu.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 
 class HomePage extends StatelessWidget {
-  final User user;
-
   Map<String, String>? productMap;
 
   Future<void> loadProductMap() async {
@@ -19,8 +15,6 @@ class HomePage extends StatelessWidget {
   }
 
   GlobalKey<AutoCompleteTextFieldState<String>> autoCompleteKey = GlobalKey();
-
-  HomePage({Key? key, required this.user}) : super(key: key);
 
   List<SearchModel> searches = [];
   List<InventoryModel> inventory = [];
@@ -53,9 +47,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     getSearches();
     return Scaffold(
-      drawer: SideBar(
-        user: user,
-      ),
+      drawer: SideBar(),
       appBar: appBar(context),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(

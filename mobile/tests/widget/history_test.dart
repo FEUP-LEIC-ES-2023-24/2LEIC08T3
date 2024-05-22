@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:greenscan/Services/auth.dart';
 import 'package:greenscan/pages/history.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mockito/mockito.dart';
@@ -13,10 +14,11 @@ void main() {
   testWidgets('HistoryPage shows CircularProgressIndicator while loading', (WidgetTester tester) async {
     // Use the fake user
     FakeUser fakeUser = FakeUser();
+    AuthService.user = fakeUser;
 
     // Build our app and trigger a frame.
     await tester.pumpWidget(MaterialApp(
-      home: HistoryPage(user: fakeUser),
+      home: HistoryPage(),
     ));
 
     // Verify that a CircularProgressIndicator is shown while loading

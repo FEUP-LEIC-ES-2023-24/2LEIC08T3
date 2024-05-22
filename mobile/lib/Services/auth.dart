@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:greenscan/Services/cred.dart';
 import 'package:greenscan/Services/firebase.dart';
 import 'package:greenscan/Services/dbUser.dart';
-import 'package:greenscan/Services/product.dart';
 
 class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;

@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:greenscan/Services/auth.dart';
-import 'package:greenscan/Services/cred.dart';
-import 'package:greenscan/pages/home.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:greenscan/pages/product-detail-page.dart';
 import 'package:greenscan/pages/register-page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   @override

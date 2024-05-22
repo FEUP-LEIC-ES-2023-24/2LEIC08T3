@@ -15,7 +15,7 @@ void main() {
     User mockUser = MockUser();
 
     // Build our app and trigger a frame.
-    await tester.pumpWidget(MaterialApp(home: HistoryPage(user: mockUser)));
+    await tester.pumpWidget(MaterialApp(home: HistoryPage()));
 
     // Verify that the HistoryPage creates a FutureBuilder.
     expect(find.byType(FutureBuilder), findsOneWidget);
