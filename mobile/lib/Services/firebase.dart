@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:greenscan/Services/auth.dart';
 import 'package:greenscan/Services/dbUser.dart';
 import 'package:greenscan/Services/store.dart';
+import 'package:image_picker/image_picker.dart';
 import "product.dart";
 
 class DataBase {
@@ -35,24 +39,46 @@ class DataBase {
     AuthService.dbUser = await DbUser.buildUserDB(data);
   }
 
-  static Future<dynamic> firebaseAddProduct(id, Product product) async {
-    final docToAdd = <String, dynamic>{
+  static Future<String> uploadImage(XFile image) async {
+    String filePath = 'products/${DateTime.now().millisecondsSinceEpoch}_${image.name}';
+    firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref().child(filePath);
+
+    firebase_storage.UploadTask uploadTask = ref.putFile(File(image.path));
+    try {
+      firebase_storage.TaskSnapshot snapshot = await uploadTask;
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print("Upload failed: $e");
+      return '';  // Return an empty string if the upload fails
+    }
+  }
+
+  static Future<void> firebaseAddProduct(String id, Product product, XFile? imageFile) async {
+    String imageUrl = '';
+    if (imageFile != null) {
+      imageUrl = await uploadImage(imageFile);  // Upload the image first
+    }
+
+    final docToAdd = {
       "brand": product.brand,
       "category": product.category,
       "country": product.country,
-      "imageUrl": product.imageUrl,
+      "imageUrl": imageUrl,  // Use the uploaded image URL
       "labels": product.labels,
       "materials": product.materials,
       "name": product.name,
       "search": product.search,
-      "store": product.stores
+      "store": product.stores,
+      "sustainableScore": product.sustainableScore,
+      "transportScore": product.transportScore,
+      "materialScore": product.materialScore,
+      "labelScore": product.labelScore
     };
 
-    await db
-        .collection("items")
-        .doc(id)
-        .set(docToAdd)
-        .onError((e, _) => print("Error writing document: $e"));
+    await db.collection("items").doc(id).set(docToAdd).catchError((e) {
+      print("Error adding document: $e");
+    });
   }
 
   static Future<dynamic> firebaseGetProduct(id) async {

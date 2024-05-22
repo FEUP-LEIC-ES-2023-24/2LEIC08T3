@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:greenscan/Services/firebase.dart';
 import 'package:greenscan/Services/product.dart';
+import 'package:greenscan/models/dialog_modal.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AddProductPage extends StatefulWidget {
@@ -62,8 +63,35 @@ class _AddProductPageState extends State<AddProductPage> {
   ];
 
   Future<void> _pickImage() async {
-    final XFile? pickedFile =
-        await _picker.pickImage(source: ImageSource.camera);
+    //DialogModal.showCustomDialog(context, true, "Product has been added successfully!");
+    final pickedFile = await showModalBottomSheet<XFile?>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text("Take Photo"),
+              onTap: () async {
+                final XFile? pickedFile =
+                await _picker.pickImage(source: ImageSource.camera);
+                Navigator.pop(context, pickedFile);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text("Choose from Gallery"),
+              onTap: () async {
+                final XFile? pickedFile =
+                await _picker.pickImage(source: ImageSource.gallery);
+                Navigator.pop(context, pickedFile);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
     if (pickedFile != null) {
       setState(() {
         _image = pickedFile;
@@ -135,7 +163,7 @@ class _AddProductPageState extends State<AddProductPage> {
         ElevatedButton.icon(
           onPressed: _pickImage,
           icon: const Icon(Icons.camera_alt),
-          label: const Text("Take Photo"),
+          label: const Text("Pick Image"),
           style: ElevatedButton.styleFrom(
             foregroundColor: Colors.white,
             backgroundColor: Colors.green,
@@ -151,13 +179,10 @@ class _AddProductPageState extends State<AddProductPage> {
   }
 
   Future<bool> _submitForm() async {
-    if (_formKey.currentState!.validate() &&
-            labels.isNotEmpty /*&& TODO restore
-        _image != null*/
-        ) {
-    for (var i = 0; i < labels.length; i++) {
-      labels[i] = convertStringToJson(labels[i])!;
-    }
+    if (_formKey.currentState!.validate() && _image != null) {
+      // Convert each label string to a JSON-friendly format
+      List<String> formattedLabels = labels.map((label) => convertStringToJson(label)!).toList();
+
       await DataBase.firebaseAddProduct(
           _idController.text.trim(),
           Product(
@@ -167,14 +192,16 @@ class _AddProductPageState extends State<AddProductPage> {
               labelScore: 0,
               name: _nameController.text.trim(),
               brand: _brandController.text.trim(),
-              imageUrl: "",
-              //_image!.path, TODO restore
+              imageUrl: _image!.path,
               category: category!,
               country: _countryController.text.trim(),
               search: _nameController.text.trim().toLowerCase(),
               materials: [convertStringToJson(selectedMaterial!)!],
-              labels: labels,
-              stores: []));
+              labels: formattedLabels,
+              stores: []
+          ),
+          _image
+      );
       return true;
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -199,23 +226,23 @@ class _AddProductPageState extends State<AddProductPage> {
             children: [
               TextFormField(
                 controller: _idController,
-                decoration: _buildDecoration('product ID'),
+                decoration: _buildDecoration('Product ID'),
                 validator: (value) =>
-                    value!.isEmpty ? 'Please enter an ID' : null,
+                value!.isEmpty ? 'Please enter an ID' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _nameController,
                 decoration: _buildDecoration('Name'),
                 validator: (value) =>
-                    value!.isEmpty ? 'Please enter a name' : null,
+                value!.isEmpty ? 'Please enter a name' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _brandController,
                 decoration: _buildDecoration('Brand'),
                 validator: (value) =>
-                    value!.isEmpty ? 'Please enter a brand' : null,
+                value!.isEmpty ? 'Please enter a brand' : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
@@ -225,18 +252,18 @@ class _AddProductPageState extends State<AddProductPage> {
                     setState(() => category = newValue),
                 items: categories
                     .map<DropdownMenuItem<String>>((String value) =>
-                        DropdownMenuItem<String>(
-                            value: value, child: Text(value)))
+                    DropdownMenuItem<String>(
+                        value: value, child: Text(value)))
                     .toList(),
                 validator: (value) =>
-                    value == null ? 'Please select a category' : null,
+                value == null ? 'Please select a category' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _countryController,
                 decoration: _buildDecoration('Country of Origin'),
                 validator: (value) =>
-                    value!.isEmpty ? 'Please enter a country of origin' : null,
+                value!.isEmpty ? 'Please enter a country of origin' : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
@@ -246,11 +273,11 @@ class _AddProductPageState extends State<AddProductPage> {
                     setState(() => selectedMaterial = newValue),
                 items: materials
                     .map<DropdownMenuItem<String>>((String value) =>
-                        DropdownMenuItem<String>(
-                            value: value, child: Text(value)))
+                    DropdownMenuItem<String>(
+                        value: value, child: Text(value)))
                     .toList(),
                 validator: (value) =>
-                    value == null ? 'Please select a material' : null,
+                value == null ? 'Please select a material' : null,
               ),
               const SizedBox(height: 16),
               const Text('Select Labels:',
