@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:greenscan/pages/product-detail-page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class BarcodeReaderPage extends StatefulWidget {
-  User user;
-  BarcodeReaderPage({
-    required this.user,
-  });
+  BarcodeReaderPage();
   @override
   _BarcodeReaderPageState createState() => _BarcodeReaderPageState();
 }
@@ -17,51 +13,42 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
 
   @override
   void initState() {
-    scanBarcode();
     super.initState();
+    scanBarcode();
   }
 
-  Future<String> scanBarcode() async {
+  Future<void> scanBarcode() async {
     try {
       String barcode = await FlutterBarcodeScanner.scanBarcode(
-        '#ff6666', // Cor da barra de cima da tela
-        'Cancelar', // Texto do botão de cancelar
-        true, // Mostrar alerta de flash
-        ScanMode.BARCODE, // Modo de escaneamento (código de barras)
+        '#ff6666', // Color of the top bar
+        'Cancel', // Text of the cancel button
+        true, // Show flash alert
+        ScanMode.BARCODE, // Scanning mode (barcode)
       );
 
-      if (barcode == '-1') {
-        throw Exception('No barcode scanned');
+      if (barcode != '-1') {
+        Navigator.pop(context, barcode); // Return the scanned barcode
       }
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ProductDetailPage(productCodes: [barcode], user: widget.user,),
-        ),
-      );
-
-      return barcode;
     } catch (e) {
-      
+      print('Error scanning barcode: $e');
     }
-
-    return "";
   }
-  void getFromDatabase(String barcode) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProductDetailPage(productCodes: [barcode], user: widget.user,),
-      ),
-    );
+
+  void getFromDatabase() {
+    if (_barcodeResult.isNotEmpty && _barcodeResult != 'No barcode scanned') {
+      Navigator.pop(context, _barcodeResult);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid barcode')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Barcode Reader'),
+        title: const Text('Barcode Reader'),
       ),
       body: Center(
         child: Column(
@@ -69,28 +56,28 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
           children: <Widget>[
             Text(
               _barcodeResult,
-              style: TextStyle(fontSize: 20),
+              style: const TextStyle(fontSize: 20),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: scanBarcode,
-              child: Text('Scan code'),
+              child: const Text('Scan code'),
             ),
             TextField(
               onChanged: (value) {
-              setState(() {
-                _barcodeResult = value;
-              });
+                setState(() {
+                  _barcodeResult = value;
+                });
               },
-              decoration: InputDecoration(
-              labelText: 'Enter barcode',
+              decoration: const InputDecoration(
+                labelText: 'Enter barcode',
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
-                onPressed: () => getFromDatabase(_barcodeResult),
-                child: Text('Get from Database'),
-                ),
+              onPressed: getFromDatabase,
+              child: const Text('Get from Database'),
+            ),
           ],
         ),
       ),

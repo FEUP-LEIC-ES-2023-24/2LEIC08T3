@@ -10,7 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 
 class HomePage extends StatelessWidget {
-  User user;
+  final User user;
 
   Map<String, String>? productMap;
 
@@ -31,6 +31,22 @@ class HomePage extends StatelessWidget {
 
   void getInventory() {
     inventory = InventoryModel.getInventory();
+  }
+
+  Future<void> scanProduct(BuildContext context) async {
+    final barcode = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => BarcodeReaderPage()),
+    );
+
+    if (barcode != null && barcode.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProductDetailPage(productCodes: [barcode]),
+        ),
+      );
+    }
   }
 
   @override
@@ -58,17 +74,8 @@ class HomePage extends StatelessWidget {
         width: 160.0,
         height: 60.0,
         child: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => BarcodeReaderPage(
-                        user: user,
-                      )),
-            );
-          },
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+          onPressed: () => scanProduct(context),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
           backgroundColor: const Color(0xff4b986c),
           child: const Text(
             'Scan',
@@ -156,7 +163,6 @@ class HomePage extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) => ProductDetailPage(
                               productCodes: [productId],
-                              user: user,
                             ),
                           ));
                     },
@@ -169,7 +175,6 @@ class HomePage extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) => ProductDetailPage(
                               productCodes: [productId],
-                              user: user,
                             ),
                           ));
                     },
@@ -311,3 +316,4 @@ class HomePage extends StatelessWidget {
     );
   }
 }
+

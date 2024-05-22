@@ -39,7 +39,6 @@ class Product {
 
   static Future<Product?> buildProductDB(Map<String, dynamic>? data) async {
     if (data == null) return null;
-
     if (!(data.containsKey("brand") ||
         data.containsKey("category") ||
         data.containsKey("country") ||
