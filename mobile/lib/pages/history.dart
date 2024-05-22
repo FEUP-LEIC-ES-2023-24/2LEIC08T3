@@ -69,7 +69,7 @@ class _HistoryPageState extends State<HistoryPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => ProductDetailPage(
-                            productCode: snapshot.data![index].barcode,
+                            productCodes: [snapshot.data![index].barcode],
                             user: widget.user,
                           ),
                         ),

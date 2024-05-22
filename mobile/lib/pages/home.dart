@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:greenscan/Services/firebase.dart';
 import 'package:greenscan/pages/barcode.dart';
 import 'package:greenscan/models/inventory_model.dart';
 import 'package:greenscan/models/search_model.dart';
@@ -6,9 +7,19 @@ import 'package:greenscan/pages/product-detail-page.dart';
 import 'package:greenscan/pages/menu.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 
 class HomePage extends StatelessWidget {
   User user;
+
+  Map<String, String>? productMap;
+
+  Future<void> loadProductMap() async {
+    productMap = await DataBase.firebaseGetSearchProduct();
+  }
+
+  GlobalKey<AutoCompleteTextFieldState<String>> autoCompleteKey = GlobalKey();
+
   HomePage({Key? key, required this.user}) : super(key: key);
 
   List<SearchModel> searches = [];
@@ -47,11 +58,13 @@ class HomePage extends StatelessWidget {
         width: 160.0,
         height: 60.0,
         child: FloatingActionButton(
-          onPressed: ()  {
+          onPressed: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => BarcodeReaderPage(user: user,)),
+                  builder: (context) => BarcodeReaderPage(
+                        user: user,
+                      )),
             );
           },
           shape:
@@ -87,45 +100,89 @@ class HomePage extends StatelessWidget {
 
   Container searchMethod(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(top: 40, left: 20, right: 20),
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.11),
-            blurRadius: 40,
-            spreadRadius: 0.0,
-          ),
-        ],
-      ),
-      child: TextField(
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.all(15),
-          hintText: 'Search Product',
-          hintStyle: const TextStyle(
-            color: Color(0xffDDDADA),
-            fontSize: 18,
-          ),
-          suffixIcon: const Padding(
-            padding: EdgeInsets.all(20),
-            child: Icon(Icons.search),
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(50),
-            borderSide: BorderSide.none,
-          ),
-        ),
-        onSubmitted: (value) => {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProductDetailPage(productCode: value, user: user,),
-            ),
-          ),
-        },
-      ),
-    );
+        child: FutureBuilder<void>(
+            future: loadProductMap(),
+            builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator(); // Show a loading spinner while waiting
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                return Container(
+                  margin: const EdgeInsets.only(top: 40, left: 20, right: 20),
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.11),
+                        blurRadius: 40,
+                        spreadRadius: 0.0,
+                      ),
+                    ],
+                  ),
+                  child: AutoCompleteTextField<String>(
+                    key: autoCompleteKey,
+                    suggestions: productMap!.keys.toList(),
+                    style: TextStyle(color: Colors.black, fontSize: 16.0),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.all(15),
+                      hintText: 'Search Product',
+                      hintStyle: const TextStyle(
+                        color: Color(0xffDDDADA),
+                        fontSize: 18,
+                      ),
+                      suffixIcon: const Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Icon(Icons.search),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                    itemFilter: (item, query) {
+                      return item.toLowerCase().startsWith(query.toLowerCase());
+                    },
+                    itemSorter: (a, b) {
+                      return a.compareTo(b);
+                    },
+
+                    textSubmitted: (item) {
+                      String productId = productMap![item]!;
+                      print(productId);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductDetailPage(
+                              productCodes: [productId],
+                              user: user,
+                            ),
+                          ));
+                    },
+
+                    itemSubmitted: (item) {
+                      String productId = productMap![item]!;
+                      print(productId);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductDetailPage(
+                              productCodes: [productId],
+                              user: user,
+                            ),
+                          ));
+                    },
+
+                    itemBuilder: (context, item) {
+                      return ListTile(
+                        title: Text(item),
+                      );
+                    },
+                  ),
+                );
+              }
+            }));
   }
 
   Column SearchesMethod() {
