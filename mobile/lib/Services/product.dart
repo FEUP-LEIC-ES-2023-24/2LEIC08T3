@@ -102,8 +102,7 @@ class Product {
         search: data['search'],
         materials: materials_,
         labels: labels_, 
-        stores: []);
-
+        stores: stores_);
         }
 
   Future<List<Store>> getProductStores() async {

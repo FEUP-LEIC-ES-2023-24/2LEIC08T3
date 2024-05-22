@@ -532,7 +532,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           height: 50,
                           child: ElevatedButton(
                             onPressed: () async {
-                              List<Store> stores = await product.getProductStores();
+                              List<Store> stores = [];
+                              try {
+                                stores = await product.getProductStores();
+                              } catch (e) {
+                                print('Error getting stores: $e');
+                              }
                               _showStoreSelection(stores);
                             },
                             style: ElevatedButton.styleFrom(
