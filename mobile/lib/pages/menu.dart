@@ -4,6 +4,7 @@ import 'package:greenscan/pages/add_product.dart';
 import 'package:greenscan/pages/barcode.dart';
 import 'package:greenscan/pages/history.dart';
 import 'package:greenscan/pages/google-maps.dart';
+import 'package:greenscan/pages/product-comparator-page.dart';
 import 'package:greenscan/pages/search-super.dart';
 import 'package:greenscan/pages/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -59,8 +60,12 @@ class SideBar extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.compare),
               title: const Text('Compare'),
-              onTap: () {
-
+              onTap: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ProductComparatorPage()),
+                );
               },
             ),
             ListTile(
