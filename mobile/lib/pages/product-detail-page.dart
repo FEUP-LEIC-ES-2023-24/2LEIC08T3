@@ -326,8 +326,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         context,
         MaterialPageRoute(builder: (context) => BarcodeReaderPage()),
       );
-      var newProductCode = '111';
-      var newProduct = await DataBase.firebaseGetProduct(newProductCode);
+      var newProduct = await DataBase.firebaseGetProduct(barcode);
       setState(() {
         products.add(newProduct as Product);
       });
