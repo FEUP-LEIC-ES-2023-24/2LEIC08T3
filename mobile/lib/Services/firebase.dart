@@ -40,8 +40,10 @@ class DataBase {
   }
 
   static Future<String> uploadImage(XFile image) async {
-    String filePath = 'products/${DateTime.now().millisecondsSinceEpoch}_${image.name}';
-    firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref().child(filePath);
+    String filePath =
+        'products/${DateTime.now().millisecondsSinceEpoch}_${image.name}';
+    firebase_storage.Reference ref =
+        firebase_storage.FirebaseStorage.instance.ref().child(filePath);
 
     firebase_storage.UploadTask uploadTask = ref.putFile(File(image.path));
     try {
@@ -50,21 +52,22 @@ class DataBase {
       return downloadUrl;
     } catch (e) {
       print("Upload failed: $e");
-      return '';  // Return an empty string if the upload fails
+      return ''; // Return an empty string if the upload fails
     }
   }
 
-  static Future<void> firebaseAddProduct(String id, Product product, XFile? imageFile) async {
+  static Future<void> firebaseAddProduct(
+      String id, Product product, XFile? imageFile) async {
     String imageUrl = '';
     if (imageFile != null) {
-      imageUrl = await uploadImage(imageFile);  // Upload the image first
+      imageUrl = await uploadImage(imageFile); // Upload the image first
     }
 
     final docToAdd = {
       "brand": product.brand,
       "category": product.category,
       "country": product.country,
-      "imageUrl": imageUrl,  // Use the uploaded image URL
+      "imageUrl": imageUrl, // Use the uploaded image URL
       "labels": product.labels,
       "materials": product.materials,
       "name": product.name,
@@ -144,5 +147,28 @@ class DataBase {
     );
 
     return await Store.buildStoreDB(data);
+  }
+
+  static Future<Map<String, String>> firebaseGetSearchProduct() async {
+    final productsRef = db.collection("items");
+    Map<String, String> productMap = {};
+
+    await productsRef.get().then(
+      (QuerySnapshot querySnapshot) {
+        querySnapshot.docs.forEach((doc) {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          String productName = data["name"];
+          String productCode = doc.id;
+          productMap[productName] = productCode;
+        });
+      },
+      onError: (e) => print("Error getting documents: $e"),
+    );
+
+    for (var key in productMap.keys) {
+      print("Product: $key, Code: ${productMap[key]}");
+    }
+
+    return productMap;
   }
 }
