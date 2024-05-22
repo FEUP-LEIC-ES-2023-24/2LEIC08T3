@@ -10,12 +10,12 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../Services/store.dart';
 import '../utils/location_services.dart';
 import '../utils/score_calculation.dart';
+import 'barcode.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final List<String> productCodes;
-  final User user;
 
-  ProductDetailPage({super.key, required this.productCodes, required this.user});
+  ProductDetailPage({super.key, required this.productCodes });
 
   @override
   _ProductDetailPageState createState() => _ProductDetailPageState();
@@ -35,7 +35,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   double progress = 0;
   bool isLoading = true;
   List<Product> products = [];
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
   int _currentPage = 0;
 
   @override
@@ -51,7 +51,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     for (String productCode in widget.productCodes) {
       try {
         var fetchedProduct = await DataBase.firebaseGetProduct(productCode);
-        fetchedProduct as Product;
+        if (fetchedProduct == null) {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const ProductNotFoundPage()));
+          break;
+        }
 
         for (var code in fetchedProduct.stores) {
           var store = await DataBase.firebaseGetStore(code);
@@ -316,14 +320,21 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 
   Future<void> _addNewProduct() async {
+    isLoading = true;
     try {
-      var newProductCode = '111'; // Replace with actual product code logic
+      final barcode = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => BarcodeReaderPage()),
+      );
+      var newProductCode = '111';
       var newProduct = await DataBase.firebaseGetProduct(newProductCode);
       setState(() {
         products.add(newProduct as Product);
       });
+      isLoading = false;
     } catch (e) {
       print('Error adding new product: $e');
+      isLoading = false;
     }
   }
 
@@ -336,7 +347,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Product Comparison'),
+        title: const Text('Product'),
         backgroundColor: Colors.green,
         elevation: 0,
       ),
@@ -567,7 +578,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             child: SmoothPageIndicator(
               controller: _pageController,
               count: products.length,
-              effect: WormEffect(
+              effect: const WormEffect(
                 dotHeight: 12,
                 dotWidth: 12,
                 activeDotColor: Colors.green,

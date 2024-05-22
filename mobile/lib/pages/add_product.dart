@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:greenscan/Services/firebase.dart';
 import 'package:greenscan/Services/product.dart';
 import 'package:greenscan/models/dialog_modal.dart';
+import 'package:greenscan/pages/product-detail-page.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AddProductPage extends StatefulWidget {
@@ -63,7 +64,6 @@ class _AddProductPageState extends State<AddProductPage> {
   ];
 
   Future<void> _pickImage() async {
-    //DialogModal.showCustomDialog(context, true, "Product has been added successfully!");
     final pickedFile = await showModalBottomSheet<XFile?>(
       context: context,
       builder: (context) => SafeArea(
@@ -180,7 +180,6 @@ class _AddProductPageState extends State<AddProductPage> {
 
   Future<bool> _submitForm() async {
     if (_formKey.currentState!.validate() && _image != null) {
-      // Convert each label string to a JSON-friendly format
       List<String> formattedLabels = labels.map((label) => convertStringToJson(label)!).toList();
 
       await DataBase.firebaseAddProduct(
@@ -202,6 +201,11 @@ class _AddProductPageState extends State<AddProductPage> {
           ),
           _image
       );
+      DialogModal.showCustomDialog(context, true, "Product has been added successfully!", () {
+        Navigator.of(context).pop();  // Exit Add Product Page
+        Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailPage(productCodes: [_idController.text.trim()])));  // Navigate to Product Detail Page
+      });
+
       return true;
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

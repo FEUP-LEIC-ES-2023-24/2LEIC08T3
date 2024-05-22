@@ -4,12 +4,10 @@ import 'package:greenscan/pages/product-detail-page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class BarcodeReaderPage extends StatefulWidget {
-  User user;
-  BarcodeReaderPage({
-    required this.user,
-  });
+  BarcodeReaderPage();
   @override
   _BarcodeReaderPageState createState() => _BarcodeReaderPageState();
+
 }
 
 class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
@@ -37,13 +35,13 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ProductDetailPage(productCodes: [barcode], user: widget.user,),
+          builder: (context) => ProductDetailPage(productCodes: [barcode]),
         ),
       );
 
       return barcode;
     } catch (e) {
-      
+
     }
 
     return "";
@@ -52,7 +50,7 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProductDetailPage(productCodes: [barcode], user: widget.user,),
+        builder: (context) => ProductDetailPage(productCodes: [barcode]),
       ),
     );
   }

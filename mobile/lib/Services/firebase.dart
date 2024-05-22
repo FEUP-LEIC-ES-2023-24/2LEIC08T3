@@ -69,7 +69,7 @@ class DataBase {
       "materials": product.materials,
       "name": product.name,
       "search": product.search,
-      "store": product.stores,
+      "stores": product.stores,
       "sustainableScore": product.sustainableScore,
       "transportScore": product.transportScore,
       "materialScore": product.materialScore,
@@ -92,7 +92,7 @@ class DataBase {
       },
       onError: (e) => print("Error getting document: $e"),
     );
-    
+
     // add the scan to the history
     if (AuthService.user == null) {
       print("user is null");

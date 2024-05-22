@@ -8,7 +8,8 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class HomePage extends StatelessWidget {
-  User user;
+  final User user;
+
   HomePage({Key? key, required this.user}) : super(key: key);
 
   List<SearchModel> searches = [];
@@ -20,6 +21,22 @@ class HomePage extends StatelessWidget {
 
   void getInventory() {
     inventory = InventoryModel.getInventory();
+  }
+
+  Future<void> scanProduct(BuildContext context) async {
+    final barcode = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => BarcodeReaderPage()),
+    );
+
+    if (barcode != null && barcode.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProductDetailPage(productCodes: [barcode]),
+        ),
+      );
+    }
   }
 
   @override
@@ -47,15 +64,8 @@ class HomePage extends StatelessWidget {
         width: 160.0,
         height: 60.0,
         child: FloatingActionButton(
-          onPressed: ()  {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => BarcodeReaderPage(user: user,)),
-            );
-          },
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+          onPressed: () => scanProduct(context),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
           backgroundColor: const Color(0xff4b986c),
           child: const Text(
             'Scan',
@@ -120,7 +130,7 @@ class HomePage extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ProductDetailPage(productCodes: [value], user: user,),
+              builder: (context) => ProductDetailPage(productCodes: [value]),
             ),
           ),
         },
@@ -254,3 +264,4 @@ class HomePage extends StatelessWidget {
     );
   }
 }
+
