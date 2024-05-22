@@ -17,7 +17,7 @@ void main() {
 
     // Build our app and trigger a frame.
     await tester.pumpWidget(MaterialApp(
-      home: BarcodeReaderPage(user: mockUser),
+      home: BarcodeReaderPage(),
     ));
 
     // Verify that the BarcodeReaderPage widget is present.

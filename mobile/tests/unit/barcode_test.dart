@@ -12,7 +12,7 @@ void main() {
 
   testWidgets('BarcodeReaderPage widget test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(MaterialApp(home: BarcodeReaderPage(user: mockUser)));
+    await tester.pumpWidget(MaterialApp(home: BarcodeReaderPage()));
 
     // Verify that the BarcodeReaderPage is created.
     expect(find.byType(BarcodeReaderPage), findsOneWidget);
