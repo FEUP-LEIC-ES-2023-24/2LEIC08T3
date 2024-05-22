@@ -55,13 +55,7 @@ class SideBar extends StatelessWidget {
                   );
                 },
               ),
-            ListTile(
-              leading: const Icon(Icons.card_giftcard),
-              title: const Text('Whislist'),
-              onTap: () {
 
-              },
-            ),
             ListTile(
               leading: const Icon(Icons.compare),
               title: const Text('Compare'),
@@ -86,13 +80,7 @@ class SideBar extends StatelessWidget {
                 );
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Settings'),
-              onTap: () {
 
-              },
-            ),
             Divider(),
             ListTile(
               leading: const Icon(Icons.logout),

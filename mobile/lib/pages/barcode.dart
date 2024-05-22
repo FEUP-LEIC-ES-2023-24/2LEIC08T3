@@ -14,7 +14,6 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
   @override
   void initState() {
     super.initState();
-    scanBarcode();
   }
 
   Future<void> scanBarcode() async {
@@ -27,7 +26,9 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
       );
 
       if (barcode != '-1') {
-        Navigator.pop(context, barcode); // Return the scanned barcode
+        setState(() {
+          _barcodeResult = barcode; // Update the barcode result
+        });
       }
     } catch (e) {
       print('Error scanning barcode: $e');
@@ -60,7 +61,7 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: scanBarcode,
+              onPressed: scanBarcode, // Start the scanner when this button is pressed
               child: const Text('Scan code'),
             ),
             TextField(
