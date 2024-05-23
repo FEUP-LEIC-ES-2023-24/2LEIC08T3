@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 class DbUser {
   final String name;
   final String email;

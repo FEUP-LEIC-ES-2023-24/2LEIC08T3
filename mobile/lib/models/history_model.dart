@@ -1,10 +1,9 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HistoryModel {
   String barcode;
   String name;
+  String? imageUrl;
 
   HistoryModel({required this.barcode, required this.name});
 
@@ -40,6 +39,10 @@ class HistoryModel {
 
       if (doc.data()!.containsKey('name')) {
         history[entry.key].name = doc["name"];
+      }
+
+      if (doc.data()!.containsKey('imageUrl')) {
+        history[entry.key].imageUrl = doc["imageUrl"];
       }
     }
 

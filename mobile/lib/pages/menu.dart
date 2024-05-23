@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:greenscan/Services/auth.dart';
 import 'package:greenscan/pages/add_product.dart';
-import 'package:greenscan/pages/barcode.dart';
 import 'package:greenscan/pages/history.dart';
 import 'package:greenscan/pages/google-maps.dart';
 import 'package:greenscan/pages/product-comparator-page.dart';
 import 'package:greenscan/pages/search-super.dart';
 import 'package:greenscan/pages/login.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 class SideBar extends StatelessWidget {
-  User user;
-  SideBar({required this.user});
+  SideBar();
 
   @override
   Widget build(BuildContext context) {

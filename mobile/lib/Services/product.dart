@@ -55,15 +55,15 @@ class Product {
     int labelScore_ = 0;
 
     final country_ = data['country'];
-    final materials_ = (data['materials'] as List<dynamic> ?? [])
+    final materials_ = (data['materials'] as List<dynamic>)
         .where((material) => material is String)
         .cast<String>()
         .toList();
-    final labels_ = (data['labels'] as List<dynamic> ?? [])
+    final labels_ = (data['labels'] as List<dynamic>)
         .where((labels) => labels is String)
         .cast<String>()
         .toList();
-    final stores_ = (data['stores'] as List<dynamic> ?? [])
+    final stores_ = (data['stores'] as List<dynamic>)
         .where((stores) => stores is String)
         .cast<String>()
         .toList();

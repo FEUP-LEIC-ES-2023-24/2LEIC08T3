@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:greenscan/Services/auth.dart';
 import 'package:greenscan/pages/product-detail-page.dart';
 import 'package:greenscan/models/history_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class HistoryPage extends StatefulWidget {
-  User user;
-
-  HistoryPage({
-    super.key,
-    required this.user,
-  });
+  const HistoryPage({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -22,7 +17,7 @@ class _HistoryPageState extends State<HistoryPage> {
   @override
   void initState() {
     super.initState();
-    _historyFuture = HistoryModel.getHistory(widget.user.uid);
+    _historyFuture = HistoryModel.getHistory(AuthService.user!.uid);
   }
 
   @override

@@ -1,6 +1,3 @@
-// import 'dart:html';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:greenscan/Services/auth.dart';
@@ -50,7 +47,7 @@ class CredService {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => HomePage(user: AuthService.user!)));
+            builder: (context) => HomePage()));
   }
 
   static void register(context) {
@@ -75,9 +72,7 @@ class CredService {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => HomePage(
-                user: AuthService.user!,
-              )),
+          builder: (context) => HomePage()),
     );
   }
 }

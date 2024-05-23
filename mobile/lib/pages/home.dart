@@ -1,24 +1,32 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:greenscan/Services/firebase.dart';
 import 'package:greenscan/pages/barcode.dart';
 import 'package:greenscan/models/search_model.dart';
 import 'package:greenscan/pages/product-detail-page.dart';
 import 'package:greenscan/pages/menu.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:greenscan/models/history_model.dart';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
+import 'package:greenscan/Services/auth.dart';
 
-class HomePage extends StatelessWidget {
-  final User user;
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
+  @override
+  // ignore: library_private_types_in_public_api
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Map<String, String>? productMap;
+  Future<List<HistoryModel>>? _historyFuture;
 
   Future<void> loadProductMap() async {
     productMap = await DataBase.firebaseGetSearchProduct();
   }
 
   GlobalKey<AutoCompleteTextFieldState<String>> autoCompleteKey = GlobalKey();
-
-  HomePage({super.key, required this.user});
 
   List<SearchModel> searches = [];
 
@@ -43,10 +51,31 @@ class HomePage extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance?.addObserver(this);
+    _historyFuture = HistoryModel.getHistory(AuthService.user!.uid);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance?.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // This code will run every time the app enters the foreground
+      _historyFuture = HistoryModel.getHistory(AuthService.user!.uid);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     getSearches();
     return Scaffold(
-      drawer: SideBar(user: user),
+      drawer: SideBar(),
       appBar: appBar(context),
       backgroundColor: Colors.green[50],
       body: SingleChildScrollView(
@@ -60,7 +89,8 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 20),
             _buildSustainabilityTips(),
             const SizedBox(height: 20),
-            SearchesMethod(),
+            getHistory(),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -314,7 +344,7 @@ class HomePage extends StatelessWidget {
           child: ListView.separated(
             itemCount: searches.length,
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(left: 20, right: 20),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
             separatorBuilder: (context, index) => const SizedBox(width: 25),
             itemBuilder: (context, index) {
               return Container(
