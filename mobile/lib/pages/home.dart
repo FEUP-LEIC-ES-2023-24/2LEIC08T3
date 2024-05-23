@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:greenscan/Services/firebase.dart';
 import 'package:greenscan/pages/barcode.dart';
@@ -5,10 +7,21 @@ import 'package:greenscan/models/inventory_model.dart';
 import 'package:greenscan/models/search_model.dart';
 import 'package:greenscan/pages/product-detail-page.dart';
 import 'package:greenscan/pages/menu.dart';
+import 'package:greenscan/models/history_model.dart';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
+import 'package:greenscan/Services/auth.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Map<String, String>? productMap;
+  Future<List<HistoryModel>>? _historyFuture;
 
   Future<void> loadProductMap() async {
     productMap = await DataBase.firebaseGetSearchProduct();
@@ -25,6 +38,78 @@ class HomePage extends StatelessWidget {
 
   void getInventory() {
     inventory = InventoryModel.getInventory();
+  }
+
+  FutureBuilder<List<HistoryModel>> getHistory() {
+    return FutureBuilder<List<HistoryModel>>(
+        future: _historyFuture, // replace this with your actual future
+        builder:
+            (BuildContext context, AsyncSnapshot<List<HistoryModel>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Container(
+              color: Colors.white,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          } else if (snapshot.hasError) {
+            print(snapshot.error);
+            return Text('Error: ${snapshot.error}');
+          } else {
+            return Container(
+                height: 120,
+                child: ListView.separated(
+                  itemCount: snapshot.data!.length,
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
+                  separatorBuilder: (context, index) => const SizedBox(width: 25),
+                  itemBuilder: (context, index) {
+                    return Container(
+                      width: 150,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: const Color(0xff4b986c), width: 2),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 70,
+                            height: 70,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Image.network(
+                                  snapshot.data![index].imageUrl ??
+                                      'assets/placeholder.png',
+                                  errorBuilder: (BuildContext context,
+                                      Object exception,
+                                      StackTrace? stackTrace) {
+                                    // You can return an error image or a placeholder here
+                                    return Image.asset(
+                                        'assets/placeholder.png');
+                                  },
+                                )),
+                          ),
+                          Text(
+                            snapshot.data![index].name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                              fontSize: 14,
+                            ),
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                ));
+          }
+        });
   }
 
   Future<void> scanProduct(BuildContext context) async {
@@ -44,6 +129,27 @@ class HomePage extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance?.addObserver(this);
+    _historyFuture = HistoryModel.getHistory(AuthService.user!.uid);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance?.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // This code will run every time the app enters the foreground
+      _historyFuture = HistoryModel.getHistory(AuthService.user!.uid);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     getSearches();
     return Scaffold(
@@ -56,7 +162,7 @@ class HomePage extends StatelessWidget {
           children: [
             searchMethod(context),
             const SizedBox(height: 10),
-            SearchesMethod(),
+            getHistory(),
             const SizedBox(height: 20),
             InventoryMethod(),
           ],
@@ -67,7 +173,8 @@ class HomePage extends StatelessWidget {
         height: 60.0,
         child: FloatingActionButton(
           onPressed: () => scanProduct(context),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
           backgroundColor: const Color(0xff4b986c),
           child: const Text(
             'Scan',
@@ -146,7 +253,6 @@ class HomePage extends StatelessWidget {
                     itemSorter: (a, b) {
                       return a.compareTo(b);
                     },
-
                     textSubmitted: (item) {
                       String productId = productMap![item]!;
                       print(productId);
@@ -158,7 +264,6 @@ class HomePage extends StatelessWidget {
                             ),
                           ));
                     },
-
                     itemSubmitted: (item) {
                       String productId = productMap![item]!;
                       print(productId);
@@ -170,7 +275,6 @@ class HomePage extends StatelessWidget {
                             ),
                           ));
                     },
-
                     itemBuilder: (context, item) {
                       return ListTile(
                         title: Text(item),
@@ -203,7 +307,7 @@ class HomePage extends StatelessWidget {
           child: ListView.separated(
             itemCount: searches.length,
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(left: 20, right: 20),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
             separatorBuilder: (context, index) => const SizedBox(width: 25),
             itemBuilder: (context, index) {
               return Container(
@@ -308,4 +412,3 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-
