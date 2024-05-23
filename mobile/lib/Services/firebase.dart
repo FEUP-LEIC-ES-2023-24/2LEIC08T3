@@ -72,7 +72,7 @@ class DataBase {
       "materials": product.materials,
       "name": product.name,
       "search": product.search,
-      "store": product.stores,
+      "stores": product.stores,
       "sustainableScore": product.sustainableScore,
       "transportScore": product.transportScore,
       "materialScore": product.materialScore,

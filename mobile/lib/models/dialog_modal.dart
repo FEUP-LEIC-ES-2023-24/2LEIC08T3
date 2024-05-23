@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 class DialogModal {
-  static void showCustomDialog(BuildContext context, bool isSuccess, String description) {
+  static void showCustomDialog(BuildContext context, bool isSuccess, String description, VoidCallback onOkPressed) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), // Rounded corners
-          elevation: 12, // Shadow effect
+          elevation: 12,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
             decoration: BoxDecoration(
@@ -49,10 +49,11 @@ class DialogModal {
                 ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
+                    onOkPressed();
                   },
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
-                    backgroundColor: isSuccess ? Colors.green : Colors.redAccent, // Button text color
+                    backgroundColor: isSuccess ? Colors.green : Colors.redAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
