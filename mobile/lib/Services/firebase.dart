@@ -171,4 +171,22 @@ class DataBase {
 
     return productMap;
   }
+
+  static Future<List<String>> firebaseGetStores() async {
+    final storesRef = db.collection("stores");
+    List<String> storeList = [];
+
+    await storesRef.get().then(
+      (QuerySnapshot querySnapshot) {
+        querySnapshot.docs.forEach((doc) {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          String pageCode = doc.id;
+          storeList.add(pageCode);
+        });
+      },
+      onError: (e) => print("Error getting documents: $e"),
+    );
+
+    return storeList;
+  }
 }
