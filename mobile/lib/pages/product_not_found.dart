@@ -68,7 +68,6 @@ class ProductNotFoundPage extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,

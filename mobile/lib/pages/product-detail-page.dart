@@ -52,8 +52,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       try {
         var fetchedProduct = await DataBase.firebaseGetProduct(productCode);
         if (fetchedProduct == null) {
+          Navigator.pop(context);
           Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const ProductNotFoundPage()));
+              MaterialPageRoute(
+                  builder: (context) => const ProductNotFoundPage()));
           break;
         }
 
@@ -65,7 +67,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         if (fetchedProduct != null) {
           fetchedProducts.add(fetchedProduct);
         } else {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductNotFoundPage()));
+          Navigator.pop(context);
+          Navigator.push(context, MaterialPageRoute(
+              builder: (context) => const ProductNotFoundPage()));
         }
       } catch (e) {
         print('Error fetching product: $e');
@@ -84,31 +88,34 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   void _showStoreSelection(List<Store> stores) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Available Stores'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (var store in stores)
-              ListTile(
-                leading: IconButton(
-                  icon: Icon(Icons.store),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => GoogleMapsPage(
-                          storePosition: LatLng(store.latitude, store.longitude),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                title: Text(store.name),
-              ),
-          ],
-        ),
-      ),
+      builder: (context) =>
+          AlertDialog(
+            title: const Text('Available Stores'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (var store in stores)
+                  ListTile(
+                    leading: IconButton(
+                      icon: Icon(Icons.store),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                GoogleMapsPage(
+                                  storePosition: LatLng(
+                                      store.latitude, store.longitude),
+                                ),
+                          ),
+                        );
+                      },
+                    ),
+                    title: Text(store.name),
+                  ),
+              ],
+            ),
+          ),
     );
   }
 
@@ -196,21 +203,22 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   fontWeight: FontWeight.bold)),
           childrenPadding: const EdgeInsets.all(6.0),
           children: evaluation.comments
-              .map((comment) => Padding(
-            padding: const EdgeInsets.only(bottom: 10.0),
-            child: Row(
-              children: [
-                const SizedBox(width: 20.0),
-                Expanded(
-                  child: Text(
-                    "• $comment",
-                    style: const TextStyle(
-                        color: Colors.black87, fontSize: 18),
-                  ),
+              .map((comment) =>
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10.0),
+                child: Row(
+                  children: [
+                    const SizedBox(width: 20.0),
+                    Expanded(
+                      child: Text(
+                        "• $comment",
+                        style: const TextStyle(
+                            color: Colors.black87, fontSize: 18),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ))
+              ))
               .toList(),
         ),
       ),
@@ -261,7 +269,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           ),
                           const Positioned(
                             top: -35,
-                            child: Icon(Icons.check_circle, color: Colors.green, size: 24),
+                            child: Icon(Icons.check_circle, color: Colors.green,
+                                size: 24),
                           ),
                         ],
                       ),
@@ -320,12 +329,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 
   Future<void> _addNewProduct() async {
-    isLoading = true;
     try {
       final barcode = await Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => BarcodeReaderPage()),
       );
+
+      isLoading = true;
       var newProduct = await DataBase.firebaseGetProduct(barcode);
       setState(() {
         products.add(newProduct as Product);
@@ -337,6 +347,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     }
   }
 
+  @override
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -358,13 +369,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               itemCount: products.length,
               itemBuilder: (context, index) {
                 Product product = products[index];
-                String material = product.materials.isNotEmpty ? product.materials[0] : 'N/A';
+                String material = product.materials.isNotEmpty ? product
+                    .materials[0] : 'N/A';
 
-                EvaluationContainer productInfo = EvaluationContainer("Info", Practice.info, [
+                EvaluationContainer productInfo = EvaluationContainer(
+                    "Info", Practice.info, [
                   'Name : ${product.name}',
                   'Company: ${product.brand}',
                   'Category: ${product.category}',
-                  'Code: ${product.stores.isNotEmpty ? product.stores.first : 'N/A'}' // Update to get the correct code
+                  'Code: ${product.stores.isNotEmpty
+                      ? product.stores.first
+                      : 'N/A'}'
                 ]);
 
                 List<EvaluationContainer> evaluations = [
@@ -415,7 +430,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14.0, vertical: 8.0),
                         child: IntrinsicHeight(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -429,36 +445,48 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                       width: 100,
                                       height: 100,
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                                        mainAxisAlignment: MainAxisAlignment
+                                            .center,
+                                        crossAxisAlignment: CrossAxisAlignment
+                                            .stretch,
                                         children: [
                                           Expanded(
                                             child: Stack(
                                               alignment: Alignment.center,
                                               children: [
                                                 TweenAnimationBuilder<double>(
-                                                  tween: Tween(begin: 0, end: progress),
-                                                  duration: const Duration(seconds: 2),
-                                                  builder: (context, value, child) =>
+                                                  tween: Tween(
+                                                      begin: 0, end: progress),
+                                                  duration: const Duration(
+                                                      seconds: 2),
+                                                  builder: (context, value,
+                                                      child) =>
                                                       SizedBox(
                                                         width: 100,
                                                         height: 100,
                                                         child: CircularProgressIndicator(
                                                           value: value,
                                                           strokeWidth: 10,
-                                                          backgroundColor: Colors.grey[200],
-                                                          color: getSustainabilityColor(product.sustainableScore),
+                                                          backgroundColor: Colors
+                                                              .grey[200],
+                                                          color: getSustainabilityColor(
+                                                              product
+                                                                  .sustainableScore),
                                                         ),
                                                       ),
                                                 ),
                                                 AnimatedSwitcher(
-                                                  duration: const Duration(seconds: 2),
-                                                  transitionBuilder: (Widget child,
-                                                      Animation<double> animation) {
+                                                  duration: const Duration(
+                                                      seconds: 2),
+                                                  transitionBuilder: (
+                                                      Widget child,
+                                                      Animation<
+                                                          double> animation) {
                                                     return FadeTransition(
                                                       opacity: animation,
                                                       child: ScaleTransition(
-                                                          scale: animation, child: child),
+                                                          scale: animation,
+                                                          child: child),
                                                     );
                                                   },
                                                 ),
@@ -480,7 +508,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 ),
                               ),
                               const VerticalDivider(
-                                  color: Colors.black38, thickness: 1, width: 32),
+                                  color: Colors.black38,
+                                  thickness: 1,
+                                  width: 32),
                               Expanded(
                                 child: Align(
                                   alignment: Alignment.center,
@@ -528,7 +558,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       const SizedBox(height: 25),
                       Center(
                         child: SizedBox(
-                          width: 220,
+                          width: 250,
                           height: 50,
                           child: ElevatedButton(
                             onPressed: () async {
@@ -547,34 +577,40 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               child: Text(
                                 'Available Stores',
                                 style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 20,
-                                ),
+                                  color: Colors.white,
+                                    fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),
                         ),
                       ),
+                      const SizedBox(height: 24),
+                      Center(
+                        child: SizedBox(
+                          width: 250,
+                          height: 50,
+                        child: ElevatedButton(
+                          onPressed: _addNewProduct,
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.green,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25.0),
+                            ),
+                            textStyle: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          child: const Text("Compare Product"),
+                        )
+                        ),
+                      ),
+                      const SizedBox(height: 24),
                     ],
                   ),
                 );
               },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: _addNewProduct,
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.green,
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-                textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              child: const Text("Compare Product"),
             ),
           ),
           Padding(
