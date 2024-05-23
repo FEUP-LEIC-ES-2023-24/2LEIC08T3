@@ -134,7 +134,7 @@ This time, there was no merging conflicts and we were much more organized and ma
 One of the biggest problems with the project has always been time management and this time was no different. Despite that, we managed to complete everything that was propose.
 
 ### Project Board At The Beginning of Sprint 3
-
+![image](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/blob/main/docs/images/sprint3before.png)
 ### Project Board At The End of Sprint 3
 
 
