@@ -136,6 +136,7 @@ One of the biggest problems with the project has always been time management and
 ### Project Board At The Beginning of Sprint 3
 ![image](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/blob/main/docs/images/sprint3before.png)
 ### Project Board At The End of Sprint 3
+![image](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/blob/main/docs/images/sprint3after.png)
 
 ### User Stories Concluded
 - [#3: As an app user, I want to be able to search for products by name](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/3)
