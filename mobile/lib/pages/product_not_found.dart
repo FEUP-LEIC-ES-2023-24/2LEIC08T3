@@ -41,7 +41,7 @@ class ProductNotFoundPage extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            if (AuthService.dbUser!.admin)
+            if (AuthService.dbUser?.admin ?? false)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: ElevatedButton(
