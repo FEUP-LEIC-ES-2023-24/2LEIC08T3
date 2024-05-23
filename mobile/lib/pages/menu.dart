@@ -22,7 +22,7 @@ class SideBar extends StatelessWidget {
       children: <Widget>[
         const DrawerHeader(
           decoration: BoxDecoration(
-            color: Color(0xff4b986c),
+            color: Colors.green,
           ),
           child: Text(
             'Menu',

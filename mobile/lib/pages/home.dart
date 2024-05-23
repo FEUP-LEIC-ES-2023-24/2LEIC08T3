@@ -69,8 +69,9 @@ class HomePage extends StatelessWidget {
         height: 60.0,
         child: FloatingActionButton(
           onPressed: () => scanProduct(context),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
-          backgroundColor: const Color(0xff4b986c),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+          backgroundColor: Colors.green,
           child: const Text(
             'Scan',
             style: TextStyle(
@@ -111,9 +112,14 @@ class HomePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Welcome to GreenScan!', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+          const Text('Welcome to GreenScan!',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
-          const Text('Redefine your Sustainable Choices Now.', style: TextStyle(color: Colors.white, fontSize: 16)),
+          const Text('Redefine your Sustainable Choices Now.',
+              style: TextStyle(color: Colors.white, fontSize: 16)),
           const SizedBox(height: 10),
           ClipRRect(
             borderRadius: BorderRadius.circular(15),
@@ -259,7 +265,8 @@ class HomePage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ProductDetailPage(productCodes: [productId]),
+                      builder: (context) =>
+                          ProductDetailPage(productCodes: [productId]),
                     ),
                   );
                 },
@@ -268,7 +275,8 @@ class HomePage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ProductDetailPage(productCodes: [productId]),
+                      builder: (context) =>
+                          ProductDetailPage(productCodes: [productId]),
                     ),
                   );
                 },
