@@ -25,6 +25,22 @@ class _AddProductPageState extends State<AddProductPage> {
   XFile? _image;
   final ImagePicker _picker = ImagePicker();
 
+  List<String> stores = [];
+  List<bool> selectedStores = [];
+
+
+  @override
+  void initState() {
+    super.initState();
+    fetchStores();
+  }
+
+  Future<void> fetchStores() async {
+    stores = await DataBase.firebaseGetStores();
+    selectedStores = List<bool>.filled(stores.length, false);
+    setState(() {});
+  }
+
   final List<String> materials = [
     "Paper",
     "Cardboard",
@@ -182,6 +198,13 @@ class _AddProductPageState extends State<AddProductPage> {
     if (_formKey.currentState!.validate() && _image != null) {
       List<String> formattedLabels = labels.map((label) => convertStringToJson(label)!).toList();
 
+      List<String> selectedStoresList = [];
+      for (int i = 0; i < stores.length; i++) {
+        if (selectedStores[i]) {
+          selectedStoresList.add(stores[i]);
+        }
+      }
+
       await DataBase.firebaseAddProduct(
           _idController.text.trim(),
           Product(
@@ -197,7 +220,7 @@ class _AddProductPageState extends State<AddProductPage> {
               search: _nameController.text.trim().toLowerCase(),
               materials: [convertStringToJson(selectedMaterial!)!],
               labels: formattedLabels,
-              stores: []
+              stores: selectedStoresList
           ),
           _image
       );
@@ -283,6 +306,23 @@ class _AddProductPageState extends State<AddProductPage> {
                 validator: (value) =>
                 value == null ? 'Please select a material' : null,
               ),
+              const SizedBox(height: 16),
+              const Text('Select Stores:',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black)),
+              ...List<Widget>.generate(stores.length, (int index) {
+                return CheckboxListTile(
+                  title: Text(stores[index]),
+                  value: selectedStores[index],
+                  onChanged: (bool? value) {
+                    setState(() {
+                      selectedStores[index] = value!;
+                    });
+                  },
+                );
+              }),
               const SizedBox(height: 16),
               const Text('Select Labels:',
                   style: TextStyle(
