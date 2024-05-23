@@ -137,5 +137,9 @@ One of the biggest problems with the project has always been time management and
 ![image](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/blob/main/docs/images/sprint3before.png)
 ### Project Board At The End of Sprint 3
 
-
 ### User Stories Concluded
+- [#3: As an app user, I want to be able to search for products by name](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/3)
+- [#15: As an app user, I want to check my product scan history](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/15)
+- [#16: As a app user, I want to see the selling places of a product](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/16)
+- [#26: As a app user, I want to compare two or more products and their sustainability ratings / procedures](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/26)
+- [#33: As a app user, I want to see a refactored and ready-to-use version of the barcode scanner](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/issues/33)
