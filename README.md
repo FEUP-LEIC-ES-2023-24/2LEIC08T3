@@ -131,7 +131,7 @@ In this final sprint, we we focus more on fixing bugs and developing tests for o
 This time, there was no merging conflicts and we were much more organized and managed to finish everything proposed for this sprint.
 
 ### The Bad
-One of the biggest problems with the project has always been time management and this time was no different. Despite that, we managed to complete everything that was propose.
+One of the biggest problems with the project has always been time management and this time was no different. Despite that, we managed to complete everything that was propose except the tests that were quite complicated.
 
 ### Project Board At The Beginning of Sprint 3
 ![image](https://github.com/FEUP-LEIC-ES-2023-24/2LEIC08T3/blob/main/docs/images/sprint3before.png)
