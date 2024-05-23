@@ -5,28 +5,25 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:google_api_headers/google_api_headers.dart';
 
-
 class SearchPlacesScreen extends StatefulWidget {
   const SearchPlacesScreen({Key? key}) : super(key: key);
 
   @override
-	  State<SearchPlacesScreen> createState() => _SearchPlacesScreenState();
+  State<SearchPlacesScreen> createState() => _SearchPlacesScreenState();
 }
 
 const key = 'AIzaSyCVa4mxHXzjuytYsXWlTBAYb7NxpTKFFLI';
 final homeScaffoldKey = GlobalKey<ScaffoldState>();
 
 class _SearchPlacesScreenState extends State<SearchPlacesScreen> {
-	  static const CameraPosition initialCameraPosition = CameraPosition(target: LatLng(41.1780, -8.5980), 
-    zoom: 13
-  );
+  static const CameraPosition initialCameraPosition =
+      CameraPosition(target: LatLng(41.1780, -8.5980), zoom: 13);
 
   Set<Marker> markersList = {};
 
-	late GoogleMapController googleMapController;
+  late GoogleMapController googleMapController;
 
   final Mode _mode = Mode.overlay;
-
 
   @override
   Widget build(BuildContext context) {
@@ -38,26 +35,32 @@ class _SearchPlacesScreenState extends State<SearchPlacesScreen> {
       body: Stack(
         children: [
           GoogleMap(
-            initialCameraPosition: initialCameraPosition, 
-            markers: markersList, 
-            mapType: MapType.normal, 
-            onMapCreated: (GoogleMapController controller){
+            initialCameraPosition: initialCameraPosition,
+            markers: markersList,
+            mapType: MapType.normal,
+            onMapCreated: (GoogleMapController controller) {
               googleMapController = controller;
             },
           ),
-          ElevatedButton(
-            onPressed: _handlePressButton,
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-                (Set<MaterialState> states) {
-                  return const Color(0xff4b986c);
-                },
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: _handlePressButton,
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+                    (Set<MaterialState> states) {
+                      return const Color(0xff4b986c);
+                    },
+                  ),
+                ),
+                child: const Text(
+                  "Search",
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w900),
+                ),
               ),
-            ),
-            child: const Text(
-              "Search",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
-              ),    
+            ],
           )
         ],
       ),
@@ -66,27 +69,26 @@ class _SearchPlacesScreenState extends State<SearchPlacesScreen> {
 
   Future<void> _handlePressButton() async {
     Prediction? p = await PlacesAutocomplete.show(
-      context: context, 
-      apiKey: key, 
-      onError: onError,
-      mode: _mode, 
-      language: 'pt', 
-      strictbounds: false, 
-      types: [""], 
-      decoration: InputDecoration(
-        hintText: 'Search', 
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20), 
-          borderSide: BorderSide(color: Colors.white)
-        )
-      ), 
-      components: [Component(Component.country,"pt")]
-    );
+        context: context,
+        apiKey: key,
+        onError: onError,
+        mode: _mode,
+        language: 'pt',
+        strictbounds: false,
+        types: [""],
+        decoration: InputDecoration(
+            hintText: 'Search',
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide(color: Colors.white))),
+        components: [Component(Component.country, "pt")]);
 
-    displayPrediction(p!,homeScaffoldKey.currentState);
+    if (p != null) {
+      displayPrediction(p!, homeScaffoldKey.currentState);
+    }
   }
 
-  void onError(PlacesAutocompleteResponse response){
+  void onError(PlacesAutocompleteResponse response) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       elevation: 0,
       behavior: SnackBarBehavior.floating,
@@ -97,24 +99,27 @@ class _SearchPlacesScreenState extends State<SearchPlacesScreen> {
         contentType: ContentType.failure,
       ),
     ));
-  }  
+  }
 
-  Future<void> displayPrediction(Prediction p, ScaffoldState? currentState) async{
+  Future<void> displayPrediction(
+      Prediction p, ScaffoldState? currentState) async {
     GoogleMapsPlaces places = GoogleMapsPlaces(
-      apiKey: key,
-      apiHeaders: await const GoogleApiHeaders().getHeaders()
-    );
+        apiKey: key, apiHeaders: await const GoogleApiHeaders().getHeaders());
 
-      PlacesDetailsResponse detail = await places.getDetailsByPlaceId(p.placeId!);
+    PlacesDetailsResponse detail = await places.getDetailsByPlaceId(p.placeId!);
 
-      final lat = detail.result.geometry!.location.lat;
-      final long = detail.result.geometry!.location.lng;
+    final lat = detail.result.geometry!.location.lat;
+    final long = detail.result.geometry!.location.lng;
 
-      markersList.clear();
-      markersList.add(Marker(markerId: const MarkerId("0"), position: LatLng(lat, long), infoWindow: InfoWindow(title: detail.result.name)));
+    markersList.clear();
+    markersList.add(Marker(
+        markerId: const MarkerId("0"),
+        position: LatLng(lat, long),
+        infoWindow: InfoWindow(title: detail.result.name)));
 
-      setState(() {});
+    setState(() {});
 
-      googleMapController.animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, long), 14));
+    googleMapController
+        .animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, long), 14));
   }
 }
