@@ -2,19 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 class BarcodeReaderPage extends StatefulWidget {
-  BarcodeReaderPage();
   @override
   _BarcodeReaderPageState createState() => _BarcodeReaderPageState();
 }
 
 class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
-  String _barcodeResult = 'No barcode scanned';
-
-  @override
-  void initState() {
-    super.initState();
-    scanBarcode();
-  }
+  String _barcodeResult = '';
 
   Future<void> scanBarcode() async {
     try {
@@ -34,7 +27,7 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
   }
 
   void getFromDatabase() {
-    if (_barcodeResult.isNotEmpty && _barcodeResult != 'No barcode scanned') {
+    if (_barcodeResult.isNotEmpty) {
       Navigator.pop(context, _barcodeResult);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -48,36 +41,89 @@ class _BarcodeReaderPageState extends State<BarcodeReaderPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Barcode Reader'),
+        backgroundColor: Colors.green,
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              _barcodeResult,
-              style: const TextStyle(fontSize: 20),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: scanBarcode,
-              child: const Text('Scan code'),
-            ),
-            TextField(
-              onChanged: (value) {
-                setState(() {
-                  _barcodeResult = value;
-                });
-              },
-              decoration: const InputDecoration(
-                labelText: 'Enter barcode',
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text(
+                'Choose an option to proceed',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: getFromDatabase,
-              child: const Text('Get from Database'),
-            ),
-          ],
+              const SizedBox(height: 40),
+              ElevatedButton.icon(
+                onPressed: scanBarcode,
+                icon: const Icon(Icons.qr_code_scanner, size: 28),
+                label: const Text(
+                  'Scan Barcode',
+                  style: TextStyle(fontSize: 18),
+                ),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white, backgroundColor: Colors.green,
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'OR',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black54,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                onChanged: (value) {
+                  setState(() {
+                    _barcodeResult = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: 'Enter barcode manually',
+                  labelStyle: const TextStyle(color: Colors.green),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(color: Colors.green),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(color: Colors.green, width: 2),
+                  ),
+                ),
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: getFromDatabase,
+                icon: const Icon(Icons.search, size: 28),
+                label: const Text(
+                  'Get from Database',
+                  style: TextStyle(fontSize: 18),
+                ),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.green,
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

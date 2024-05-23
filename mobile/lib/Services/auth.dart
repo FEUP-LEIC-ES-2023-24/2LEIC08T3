@@ -14,13 +14,18 @@ class AuthService {
     UserCredential credential;
 
     try {
-      credential = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
-    } catch (e) {
-      e as FirebaseAuthException;
+    credential = await _auth.signInWithEmailAndPassword(
+        email: email, password: password);
+  } catch (e) {
+    if (e is FirebaseException) {
+      // Handle FirebaseException
       CredService.showErrorMsg(context, "Invalid Credentials", e.message);
-      return;
+    } else {
+      // Re-throw the exception
+      rethrow;
     }
+    return;
+  }
 
     user = credential.user;
     await DataBase.firebaseGetUser();

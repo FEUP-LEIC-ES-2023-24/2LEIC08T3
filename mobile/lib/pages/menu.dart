@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:greenscan/Services/auth.dart';
 import 'package:greenscan/pages/add_product.dart';
 import 'package:greenscan/pages/history.dart';
+import 'package:greenscan/pages/google-maps.dart';
+import 'package:greenscan/pages/product-comparator-page.dart';
 import 'package:greenscan/pages/search-super.dart';
 import 'package:greenscan/pages/login.dart';
 
@@ -50,18 +52,16 @@ class SideBar extends StatelessWidget {
                   );
                 },
               ),
-            ListTile(
-              leading: const Icon(Icons.card_giftcard),
-              title: const Text('Whislist'),
-              onTap: () {
 
-              },
-            ),
             ListTile(
               leading: const Icon(Icons.compare),
               title: const Text('Compare'),
-              onTap: () {
-
+              onTap: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ProductComparatorPage()),
+                );
               },
             ),
             ListTile(
@@ -81,13 +81,7 @@ class SideBar extends StatelessWidget {
                 );
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Settings'),
-              onTap: () {
 
-              },
-            ),
             Divider(),
             ListTile(
               leading: const Icon(Icons.logout),
