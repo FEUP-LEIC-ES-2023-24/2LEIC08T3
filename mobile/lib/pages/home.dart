@@ -83,13 +83,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
-            _buildWelcomeBanner(),
-            const SizedBox(height: 20),
             searchMethod(context),
             const SizedBox(height: 20),
-            _buildSustainabilityTips(),
+            _buildWelcomeBanner(),
             const SizedBox(height: 20),
-            getHistory(),
+            _buildSustainabilityTips(),
             const SizedBox(height: 20),
           ],
         ),
@@ -291,24 +289,28 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   return a.compareTo(b);
                 },
                 textSubmitted: (item) {
-                  String productId = productMap![item]!;
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          ProductDetailPage(productCodes: [productId]),
-                    ),
-                  );
+                  if (productMap![item] != null) {
+                    String productId = productMap![item]!;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ProductDetailPage(productCodes: [productId]),
+                      ),
+                    );
+                  }
                 },
                 itemSubmitted: (item) {
-                  String productId = productMap![item]!;
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          ProductDetailPage(productCodes: [productId]),
-                    ),
-                  );
+                  if (productMap![item] != null) {
+                    String productId = productMap![item]!;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ProductDetailPage(productCodes: [productId]),
+                      ),
+                    );
+                  }
                 },
                 itemBuilder: (context, item) {
                   return ListTile(
