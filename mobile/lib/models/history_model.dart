@@ -46,6 +46,8 @@ class HistoryModel {
       }
     }
 
+    history.removeWhere((item) => item.name == "Missing!");
+
     return history;
   }
 }
